@@ -1,5 +1,5 @@
 export default [
-  { heading: 'Others' },
+ { heading: 'Others' },
   {
     title: 'Access Control',
     icon: { icon: 'tabler-command' },

@@ -48,10 +48,13 @@
     "vue-i18n": "9.13.1",
     "vue-prism-component": "2.0.0",
     "vue-router": "4.4.0",
+    "vue-toast-notification": "^3.1.3",
     "vue3-apexcharts": "1.5.3",
     "vue3-perfect-scrollbar": "2.0.0",
+    "vue3-toastify": "^0.2.8",
     "vuetify": "3.6.13",
-    "webfontloader": "1.6.28"
+    "webfontloader": "1.6.28",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@antfu/eslint-config-vue": "0.43.1",
@@ -76,9 +79,11 @@
     "@tiptap/extension-subscript": "^2.5.8",
     "@tiptap/extension-superscript": "^2.5.8",
     "@tiptap/extension-underline": "^2.5.8",
+    "@types/lodash": "^4.17.14",
     "@types/mapbox-gl": "3.4.0",
     "@types/node": "22.0.0",
     "@types/webfontloader": "1.6.38",
+    "@types/xlsx": "^0.0.35",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "@videojs-player/vue": "1.0.0",

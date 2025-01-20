@@ -24,12 +24,12 @@ export default [
         to: 'dashboards-logistics',
       },
     ],
-    badgeContent: '5',
-    badgeClass: 'bg-error',
+   badgeContent: '5',
+   badgeClass: 'bg-error',
   },
   {
     title: 'Front Pages',
-    icon: { icon: 'tabler-files' },
+     icon: { icon: 'tabler-files' },
     children: [
       {
         title: 'Landing',

@@ -1,5 +1,5 @@
 export default [
-  { heading: 'Apps & Pages' },
+ { heading: 'Apps & Page' },
   {
     title: 'Ecommerce',
     icon: { icon: 'tabler-shopping-cart' },

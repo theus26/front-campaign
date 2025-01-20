@@ -1,5 +1,5 @@
 export default [
-  { heading: 'Forms & Tables' },
+ { heading: 'Forms & Tables' },
   {
     title: 'Form Elements',
     icon: { icon: 'tabler-checkbox' },

@@ -14,7 +14,7 @@ const simpleStatisticsDemoCards = [
   {
     icon: 'tabler-credit-card',
     color: 'error',
-    title: 'Total Profit',
+    title: 'Total Profieeeeeeeet',
     subTitle: 'Last week',
     stat: '1.28k',
     change: '-12.2%',

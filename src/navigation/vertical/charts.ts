@@ -1,5 +1,5 @@
 export default [
-  { heading: 'Charts' },
+ { heading: 'Charts' },
   {
     title: 'Charts',
     icon: { icon: 'tabler-chart-donut-2' },
