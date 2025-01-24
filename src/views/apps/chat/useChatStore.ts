@@ -1,5 +1,5 @@
-import type { ActiveChat } from './useChat'
 import type { ChatContact, ChatContactWithChat, ChatMessage, ChatOut } from '@db/apps/chat/types'
+import type { ActiveChat } from './useChat'
 
 interface State {
   chatsContacts: ChatContactWithChat[]
@@ -42,9 +42,8 @@ export const useChatStore = defineStore('chat', {
       this.activeChat = res
     },
 
-    async sendMsg(message: ChatMessage['message']) {
+    async sendMsg(message: ChatMessage | ChatMessage['message']) {
       const senderId = this.profileUser?.id
-
       const response = await $api(`apps/chat/chats/${this.activeChat?.contact.id}`, {
         method: 'POST',
         body: { message, senderId },
@@ -52,10 +51,21 @@ export const useChatStore = defineStore('chat', {
 
       const { msg, chat }: { msg: ChatMessage; chat: ChatOut } = response
 
+      const simplifyResponse = (response: any) => {        
+        return {
+          mediaType: response.message.mediaType,
+          mediaUrl: response.message.mediaUrl,
+          feedback: response.message.feedback,
+          message: response.message.message,
+          senderId: response.message.senderId,
+          time: response.message.time,
+        };
+      };
+
       // ? If it's not undefined => New chat is created (Contact is not in list of chats)
       if (chat !== undefined) {
         const activeChat = this.activeChat!
-
+        console
         this.chatsContacts.push({
           ...activeChat.contact,
           chat: {
@@ -67,6 +77,7 @@ export const useChatStore = defineStore('chat', {
         })
 
         if (this.activeChat) {
+          console.log('aqui2');
           this.activeChat.chat = {
             id: chat.id,
             messages: [msg],
@@ -76,18 +87,18 @@ export const useChatStore = defineStore('chat', {
         }
       }
       else {
-        this.activeChat?.chat?.messages.push(msg)
-      }
-
       // Set Last Message for active contact
-      const contact = this.chatsContacts.find(c => {
-        if (this.activeChat)
-          return c.id === this.activeChat.contact.id
+      const simplifiedResponse = simplifyResponse(msg);
+      this.activeChat?.chat?.messages.push(simplifiedResponse)
+    }
+    const contact = this.chatsContacts.find(c => {
+      if (this.activeChat)
+        return c.id === this.activeChat.contact.id
 
-        return false
-      }) as ChatContactWithChat
+      return false
+    }) as ChatContactWithChat
 
-      contact.chat.lastMessage = msg
-    },
+    contact.chat.lastMessage = msg
   },
+},
 })

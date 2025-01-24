@@ -10,6 +10,7 @@ import { themeConfig } from '@themeConfig'
 import { useToast } from 'vue-toast-notification'
 import { VForm } from 'vuetify/components/VForm'
 import * as XLSX from 'xlsx'
+import MessageComponent from './components/message.vue'
 
 const $toast = useToast();
 const campaignStore = useCampaignStore();
@@ -285,6 +286,7 @@ const handleFileUpload = (event: any) => {
 watch(selectedContacts, () => {
   shippingNumbers.value = []
 });
+
 </script>
 
 <template>
@@ -363,14 +365,13 @@ watch(selectedContacts, () => {
               </VCol>
 
               <VCol cols="12">
-                <div class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8">
+                <div class="d-flex flex-wrap gap-4 justify-end mt-8">
                   <VBtn color="secondary" variant="tonal" disabled>
-                    <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-                    Previous
+                    Salvar rascunho
                   </VBtn>
 
                   <VBtn type="submit">
-                    Next
+                    Próximo
                     <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
                   </VBtn>
                 </div>
@@ -451,16 +452,22 @@ watch(selectedContacts, () => {
               </VCol>
 
               <VCol cols="12">
-                <div class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8">
+                <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
                   <VBtn color="secondary" variant="tonal" @click="currentStep--">
                     <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-                    Previous
+                    Voltar
                   </VBtn>
 
-                  <VBtn type="submit">
-                    Next
-                    <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
-                  </VBtn>
+                  <div class="d-flex gap-4">
+                    <VBtn color="secondary" variant="tonal">
+                      Salvar rascunho
+                    </VBtn>
+
+                    <VBtn type="submit">
+                      Próximo
+                      <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
+                    </VBtn>
+                  </div>
                 </div>
               </VCol>
             </VRow>
@@ -503,16 +510,22 @@ watch(selectedContacts, () => {
 
 
               <VCol cols="12">
-                <div class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8">
+                <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
                   <VBtn color="secondary" variant="tonal" @click="currentStep--">
                     <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-                    Previous
+                    Voltar
                   </VBtn>
 
-                  <VBtn type="submit">
-                    Next
-                    <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
-                  </VBtn>
+                  <div class="d-flex gap-4">
+                    <VBtn color="secondary" variant="tonal">
+                      Salvar rascunho
+                    </VBtn>
+
+                    <VBtn type="submit">
+                      Próximo
+                      <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
+                    </VBtn>
+                  </div>
                 </div>
               </VCol>
             </VRow>
@@ -532,37 +545,28 @@ watch(selectedContacts, () => {
                 </p>
               </VCol>
 
-              <VCol cols="12" md="6">
-                <AppTextField v-model="socialForm.twitter" placeholder="https://twitter.com/abc"
-                  :rules="[requiredValidator, urlValidator]" label="Twitter" />
+              <VCol cols="12">
+                <MessageComponent />
               </VCol>
 
-              <VCol cols="12" md="6">
-                <AppTextField v-model="socialForm.facebook" placeholder="https://facebook.com/abc"
-                  :rules="[requiredValidator, urlValidator]" label="Facebook" />
-              </VCol>
-
-              <VCol cols="12" md="6">
-                <AppTextField v-model="socialForm.googlePlus" placeholder="https://plus.google.com/abc"
-                  :rules="[requiredValidator, urlValidator]" label="Google+" />
-              </VCol>
-
-              <VCol cols="12" md="6">
-                <AppTextField v-model="socialForm.linkedIn" placeholder="https://linkedin.com/abc"
-                  :rules="[requiredValidator, urlValidator]" label="LinkedIn" />
-              </VCol>
 
               <VCol cols="12">
-                <div class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8">
+                <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
                   <VBtn color="secondary" variant="tonal" @click="currentStep--">
                     <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-                    Previous
+                    Voltar
                   </VBtn>
 
-                  <VBtn type="submit">
-                    Next
-                    <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
-                  </VBtn>
+                  <div class="d-flex gap-4">
+                    <VBtn color="secondary" variant="tonal">
+                      Salvar rascunho
+                    </VBtn>
+
+                    <VBtn type="submit" :disabled="campaignStore.getDraft.messages.length === 0">
+                      Criar campanha
+                      <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
+                    </VBtn>
+                  </div>
                 </div>
               </VCol>
             </VRow>
@@ -643,7 +647,7 @@ watch(selectedContacts, () => {
             <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
               <VBtn color="secondary" variant="tonal" :disabled="currentStep === 0" @click="currentStep--">
                 <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-                Previous
+                Voltar
               </VBtn>
 
               <VBtn color="success" @click="console.log('Form Submitted')">

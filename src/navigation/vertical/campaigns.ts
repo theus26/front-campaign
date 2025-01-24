@@ -3,6 +3,6 @@ export default [
   {
     title: 'Campaigns',
     icon: { icon: 'tabler-chart-donut-2' },
-   to: 'campaigns-campaign'
+   to: 'campaigns-create'
   }
 ]

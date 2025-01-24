@@ -11,6 +11,8 @@ export interface ChatContact {
 
 export interface ChatMessage {
   message: string
+  mediaType?: string
+  mediaUrl?: string
   time: string
   senderId: number
   feedback: {

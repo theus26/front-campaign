@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { defineStore } from 'pinia';
 
-interface Messages {
+export interface Messages {
   type: string | null;
   message: string | null;
   mediaType: string | null;
@@ -17,7 +17,7 @@ export interface CampaignDraft {
   name: string | null;
   intervalRepeat: number | null | undefined;
   numbers: any[];
-  messages: Messages | any;
+  messages: Messages[] | any;
   recurrence: string | null;
   startTime: string | null;
   timeEnd: string | null;
@@ -57,16 +57,7 @@ const defaultCampaignDraft: CampaignDraft = {
   name: null,
   intervalRepeat: null,
   numbers: [],
-  messages: {
-    caption: null,
-    dataUrl: null,
-    fileName: null,
-    media: null,
-    mediaType: null,
-    message: null,
-    mimetype: null,
-    type: null,
-  },
+  messages:[],
   recurrence: null,
   startTime: null,
   timeEnd: null,
