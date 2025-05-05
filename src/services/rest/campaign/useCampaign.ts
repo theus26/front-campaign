@@ -1,0 +1,1 @@
+import defaultConfig from "@/resources/constants";
