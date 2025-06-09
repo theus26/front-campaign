@@ -1,173 +1,408 @@
 <script setup lang="ts">
-import type { CampaignDraft } from '@/store/campaign'
-import { useCampaignStore } from '@/store/campaign'
-import type { CustomInputContent } from '@core/types'
-import customWizardAccount from '@images/svg/wizard-account.svg'
-import customWizardAddress from '@images/svg/wizard-address.svg'
-import customWizardPersonal from '@images/svg/wizard-personal.svg'
-import customWizardSocialLink from '@images/svg/wizard-social-link.svg'
-import { themeConfig } from '@themeConfig'
-import { useToast } from 'vue-toast-notification'
-import { VForm } from 'vuetify/components/VForm'
-import * as XLSX from 'xlsx'
-import MessageComponent from './components/message.vue'
+import type { CampaignDraft } from "@/store/campaign";
+import { useCampaignStore } from "@/store/campaign";
+import type { CustomInputContent } from "@core/types";
+import customWizardAccount from "@images/svg/wizard-account.svg";
+import customWizardAddress from "@images/svg/wizard-address.svg";
+import customWizardPersonal from "@images/svg/wizard-personal.svg";
+import customWizardSocialLink from "@images/svg/wizard-social-link.svg";
+import { themeConfig } from "@themeConfig";
+import { useToast } from "vue-toast-notification";
+import { VForm } from "vuetify/components/VForm";
+import * as XLSX from "xlsx";
+import MessageComponent from "./components/message.vue";
+
+import type { ECommerceProduct } from "@db/apps/ecommerce/types";
+
+export interface IProvider {
+  providerId: string;
+  credential: string;
+  name: string;
+  accountId: string;
+  instanceName: string;
+  instanceId: string;
+  status: string;
+  owner: string | null;
+  profileName: string | null;
+  profilePictureUrl: string | null;
+}
+
+const provider: IProvider[] = [
+  {
+    providerId: "2c328275-4473-4f36-8ff7-a783e755eee3",
+    credential: "marta",
+    name: "Matheus",
+    accountId: "00000000-0000-0000-0000-000000000000",
+    instanceName: "account_cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+    instanceId: "a988df3a-82ba-477b-a2ae-636d36228910",
+    status: "close",
+    owner: null,
+    profileName: null,
+    profilePictureUrl:
+      "https://pps.whatsapp.net/v/t61.24694-24/491877600_1078109354191885_8964089973991435560_n.jpg?ccb=11-4&oh=01_Q5Aa1wEnvrSWIjaJ_3dfit6hvCdc2eoZhg2U6BhVbwoD24sUXQ&oe=6854741A&_nc_sid=5e03e0&_nc_cat=104",
+  },
+  {
+    providerId: "aeb24b9f-258d-4b2d-94df-b600d10c11d3",
+    credential: "marta22222",
+    name: "account_cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+    accountId: "00000000-0000-0000-0000-000000000000",
+    instanceName: "account_cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+    instanceId: "a988df3a-82ba-477b-a2ae-636d36228910",
+    status: "close",
+    owner: null,
+    profileName: null,
+    profilePictureUrl:
+      "https://pps.whatsapp.net/v/t61.24694-24/491877600_1078109354191885_8964089973991435560_n.jpg?ccb=11-4&oh=01_Q5Aa1wEnvrSWIjaJ_3dfit6hvCdc2eoZhg2U6BhVbwoD24sUXQ&oe=6854741A&_nc_sid=5e03e0&_nc_cat=104",
+  },
+  {
+    providerId: "17a7a2ea-ad5e-4f42-a988-bcb60608371d",
+    credential: "dsadsadadasdasdasdasdasdasdas",
+    name: "account_cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+    accountId: "00000000-0000-0000-0000-000000000000",
+    instanceName: "account_cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+    instanceId: "a988df3a-82ba-477b-a2ae-636d36228910",
+    status: "close",
+    owner: null,
+    profileName: null,
+    profilePictureUrl:
+      "https://pps.whatsapp.net/v/t61.24694-24/491877600_1078109354191885_8964089973991435560_n.jpg?ccb=11-4&oh=01_Q5Aa1wEnvrSWIjaJ_3dfit6hvCdc2eoZhg2U6BhVbwoD24sUXQ&oe=6854741A&_nc_sid=5e03e0&_nc_cat=104",
+  },
+  {
+    providerId: "8e20cf1d-ad8e-4ea3-b3de-61b017389166",
+    credential: "account_cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+    name: "account_cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+    accountId: "00000000-0000-0000-0000-000000000000",
+    instanceName: "account_cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+    instanceId: "a988df3a-82ba-477b-a2ae-636d36228910",
+    status: "close",
+    owner: null,
+    profileName: null,
+    profilePictureUrl:
+      "https://pps.whatsapp.net/v/t61.24694-24/491877600_1078109354191885_8964089973991435560_n.jpg?ccb=11-4&oh=01_Q5Aa1wEnvrSWIjaJ_3dfit6hvCdc2eoZhg2U6BhVbwoD24sUXQ&oe=6854741A&_nc_sid=5e03e0&_nc_cat=104",
+  },
+  {
+    providerId: "9cf1f667-bf61-4df5-b69a-783929a07866",
+    credential: "account_cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+    name: "Matheus felipe",
+    accountId: "00000000-0000-0000-0000-000000000000",
+    instanceName: "account_cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+    instanceId: "d2eb18da-0f79-4acf-b7d7-297085eb6da8",
+    status: "open",
+    owner: "557988209261@s.whatsapp.net",
+    profileName: null,
+    profilePictureUrl:
+      "https://pps.whatsapp.net/v/t61.24694-24/491877600_1078109354191885_8964089973991435560_n.jpg?ccb=11-4&oh=01_Q5Aa1wEnvrSWIjaJ_3dfit6hvCdc2eoZhg2U6BhVbwoD24sUXQ&oe=6854741A&_nc_sid=5e03e0&_nc_cat=104",
+  },
+];
+
+const providers = computed((): IProvider[] => {
+  if (searchQuery.value) {
+    return provider.filter((i) => {
+      const matchDescricao = i.name
+        .toLowerCase()
+        .includes(searchQuery.value.toLowerCase());
+
+      return matchDescricao;
+    });
+  }
+  return provider;
+});
+
+const widgetData = ref([
+  {
+    title: "In-Store Sales",
+    value: "$5,345",
+    icon: "tabler-smart-home",
+    desc: "5k orders",
+    change: 5.7,
+  },
+  {
+    title: "Website Sales",
+    value: "$674,347",
+    icon: "tabler-device-laptop",
+    desc: "21k orders",
+    change: 12.4,
+  },
+  {
+    title: "Discount",
+    value: "$14,235",
+    icon: "tabler-gift",
+    desc: "6k orders",
+  },
+  {
+    title: "Affiliate",
+    value: "$8,345",
+    icon: "tabler-wallet",
+    desc: "150 orders",
+    change: -3.5,
+  },
+]);
+
+const headers = [
+  { title: "Nome", key: "product", sortable: false },
+  { title: "Status", key: "status", align: "center" as const, sortable: false },
+  {
+    title: "Ações",
+    key: "actions",
+    sortable: false,
+    align: "center" as const,
+  },
+];
+
+const selectedStatus = ref();
+const selectedCategory = ref();
+const selectedStock = ref<boolean | undefined>();
+const searchQuery = ref("");
+const selectedRows = ref([]);
+
+const status = ref([
+  { title: "Scheduled", value: "Scheduled" },
+  { title: "Publish", value: "Published" },
+  { title: "Inactive", value: "Inactive" },
+]);
+
+const categories = ref([
+  { title: "Accessories", value: "Accessories" },
+  { title: "Home Decor", value: "Home Decor" },
+  { title: "Electronics", value: "Electronics" },
+  { title: "Shoes", value: "Shoes" },
+  { title: "Office", value: "Office" },
+  { title: "Games", value: "Games" },
+]);
+
+const stockStatus = ref([
+  { title: "In Stock", value: true },
+  { title: "Out of Stock", value: false },
+]);
+
+// Data table options
+const itemsPerPage = ref(10);
+const page = ref(1);
+const sortBy = ref();
+const orderBy = ref();
+
+// Update data table options
+const updateOptions = (options: any) => {
+  sortBy.value = options.sortBy[0]?.key;
+  orderBy.value = options.sortBy[0]?.order;
+};
+
+const resolveCategory = (category: string) => {
+  if (category === "Accessories")
+    return { color: "error", icon: "tabler-device-watch" };
+  if (category === "Home Decor") return { color: "info", icon: "tabler-home" };
+  if (category === "Electronics")
+    return { color: "primary", icon: "tabler-device-imac" };
+  if (category === "Shoes") return { color: "success", icon: "tabler-shoe" };
+  if (category === "Office")
+    return { color: "warning", icon: "tabler-briefcase" };
+  if (category === "Games")
+    return { color: "primary", icon: "tabler-device-gamepad-2" };
+};
+
+const resolveStatus = (statusMsg: string) => {
+  if (statusMsg === "conecting")
+    return { text: "Conectando", color: "warning" };
+  if (statusMsg === "open") return { text: "Conectado", color: "success" };
+  if (statusMsg === "close") return { text: "Desconectado", color: "error" };
+};
+
+const { data: productsData, execute: fetchProducts } = await useApi<any>(
+  createUrl("/apps/ecommerce/products", {
+    query: {
+      q: searchQuery,
+      stock: selectedStock,
+      category: selectedCategory,
+      status: selectedStatus,
+      page,
+      itemsPerPage,
+      sortBy,
+      orderBy,
+    },
+  })
+);
+
+const products = computed(
+  (): ECommerceProduct[] => productsData.value.products
+);
+const totalProduct = computed(() => productsData.value.total);
+
+const deleteProduct = async (id: string) => {
+  await $api(`apps/ecommerce/products/${id}`, {
+    method: "DELETE",
+  });
+
+  // Delete from selectedRows
+  const index = selectedRows.value.findIndex((row) => row === id);
+  if (index !== -1) selectedRows.value.splice(index, 1);
+
+  // Refetch products
+  fetchProducts();
+};
 
 const $toast = useToast();
 const campaignStore = useCampaignStore();
 
 const iconsSteps = [
   {
-    title: 'Informações da campanha',
+    title: "Informações da campanha",
     icon: customWizardAccount,
   },
   {
-    title: 'Público-alvo',
+    title: "Público-alvo",
     icon: customWizardPersonal,
   },
   {
-    title: 'Caixa de saída',
+    title: "Caixa de saída",
     icon: customWizardAddress,
   },
   {
-    title: 'Mensagem',
+    title: "Mensagem",
     icon: customWizardSocialLink,
   },
-]
+];
 const radioContent: CustomInputContent[] = [
   {
-    title: 'Única',
-    desc: 'Envie mensagens automáticas para seus contatos de forma única.',
-    value: 'unica',
+    title: "Única",
+    desc: "Envie mensagens automáticas para seus contatos de forma única.",
+    value: "unica",
   },
   {
-    title: 'Recorrente',
-    value: 'recorrente',
-    desc: 'Envie mensagens automáticas de maneira recorrente para seus contatos.'
+    title: "Recorrente",
+    value: "recorrente",
+    desc: "Envie mensagens automáticas de maneira recorrente para seus contatos.",
   },
-]
+];
 
 const typeContacts: CustomInputContent[] = [
   {
-    title: 'Adicione os números de forma manual',
-    desc: 'Digite os números desejados manualmente para incluir novos contatos no chat.',
-    value: 'manual',
+    title: "Adicione os números de forma manual",
+    desc: "Digite os números desejados manualmente para incluir novos contatos no chat.",
+    value: "manual",
   },
   {
-    title: ' Importar planilhas',
-    value: 'import',
-    desc: 'Importe um arquivo em formato XLS, XLSX ou CSV contendo a lista de números.'
+    title: " Importar planilhas",
+    value: "import",
+    desc: "Importe um arquivo em formato XLS, XLSX ou CSV contendo a lista de números.",
   },
-]
+];
 
-const currentStep = ref(0)
-const isCurrentStepValid = ref(true)
-const loading = ref(false)
-const refStepOne = ref<VForm>()
-const refStepTwo = ref<VForm>()
-const refSocialLinkForm = ref<VForm>()
-const refAddressForm = ref<VForm>()
+const currentStep = ref(0);
+const isCurrentStepValid = ref(true);
+const loading = ref(false);
+const refStepOne = ref<VForm>();
+const refStepTwo = ref<VForm>();
+const refSocialLinkForm = ref<VForm>();
+const refAddressForm = ref<VForm>();
 const fileInput = ref<HTMLInputElement | null>(null);
-const shippingNumbers = ref([] as string[])
-const selectedContacts = ref('manual')
-const message = ref('')
-const nameProvider = ref('')
+const shippingNumbers = ref([] as string[]);
+const selectedContacts = ref("manual");
+const message = ref("");
+const nameProvider = ref("");
 
-const breakMessage = ['A cada 5 min - Recomendado', 'A cada 3 min', 'A cada 2 min - Risco de banimento', 'A cada 1 min - Alto risco de banimento']
-const recurrencePeriod = ['Diário', 'Semanal', 'Mensal']
+const breakMessage = [
+  "A cada 5 min - Recomendado",
+  "A cada 3 min",
+  "A cada 2 min - Risco de banimento",
+  "A cada 1 min - Alto risco de banimento",
+];
+const recurrencePeriod = ["Diário", "Semanal", "Mensal"];
 
 const stepOneForm = ref({
-  nameCampaign: '',
-  typeCampaign: 'unica',
-  dataStart: '',
-  dataEnd: '',
-  intervalRepeat: '',
-  messageBreak: '',
-  startTime: '',
-  endTime: '',
-})
+  nameCampaign: "",
+  typeCampaign: "unica",
+  dataStart: "",
+  dataEnd: "",
+  intervalRepeat: "",
+  messageBreak: "",
+  startTime: "",
+  endTime: "",
+});
 
 const personalForm = ref({
-  firstName: '',
-  lastName: '',
+  firstName: "",
+  lastName: "",
   country: undefined,
   language: undefined,
-})
+});
 
 const socialForm = ref({
-  twitter: '',
-  facebook: '',
-  googlePlus: '',
-  linkedIn: '',
-})
+  twitter: "",
+  facebook: "",
+  googlePlus: "",
+  linkedIn: "",
+});
 
 const addressForm = ref({
-  address: '',
-  landmark: '',
-  city: '',
-  pincode: '',
-})
+  address: "",
+  landmark: "",
+  city: "",
+  pincode: "",
+});
 
 const addNumber = () => {
   var number = extractNumbers(message.value);
   if (!number) return;
   shippingNumbers.value.push(number);
   message.value = "";
-}
+};
 
 const createProvider = () => {
-  console.log('provider criaddo')
-}
+  console.log("provider criaddo");
+};
 
 const validateStepOne = () => {
-  refStepOne.value?.validate().then(valid => {
-    console.log(stepOneForm.value)
+  refStepOne.value?.validate().then((valid) => {
     if (!valid.valid) {
-      isCurrentStepValid.value = false
-      return
+      isCurrentStepValid.value = false;
+      return;
     }
     if (!validateTime(stepOneForm.value.startTime, stepOneForm.value.endTime)) {
       return;
     }
     const campaign = getDetailCampaign(stepOneForm.value);
-    campaignStore.setDraft(campaign)
+    campaignStore.setDraft(campaign);
     currentStep.value++;
     isCurrentStepValid.value = true;
-  })
-}
+  });
+};
 
 const validateStepTwo = () => {
-  refStepTwo.value?.validate().then(valid => {
+  refStepTwo.value?.validate().then((valid) => {
     if (valid.valid) {
       campaignStore.setDraft({
-        ...campaignStore as unknown as CampaignDraft,
-        numbers: shippingNumbers.value
-      })
-      currentStep.value++
-      isCurrentStepValid.value = true
+        ...(campaignStore as unknown as CampaignDraft),
+        numbers: shippingNumbers.value,
+      });
+      currentStep.value++;
+      isCurrentStepValid.value = true;
+    } else {
+      isCurrentStepValid.value = false;
     }
-    else { isCurrentStepValid.value = false }
-  })
-}
+  });
+};
 
 const validateAddressForm = () => {
-  refAddressForm.value?.validate().then(valid => {
+  refAddressForm.value?.validate().then((valid) => {
     if (valid.valid) {
-      currentStep.value++
-      isCurrentStepValid.value = true
+      currentStep.value++;
+      isCurrentStepValid.value = true;
+    } else {
+      isCurrentStepValid.value = false;
     }
-    else { isCurrentStepValid.value = false }
-  })
-}
+  });
+};
 
 const validateSocialLinkForm = () => {
-  refSocialLinkForm.value?.validate().then(valid => {
+  refSocialLinkForm.value?.validate().then((valid) => {
     if (valid.valid) {
-      currentStep.value++
-      isCurrentStepValid.value = true
+      currentStep.value++;
+      isCurrentStepValid.value = true;
+    } else {
+      isCurrentStepValid.value = false;
     }
-    else { isCurrentStepValid.value = false }
-  })
-}
+  });
+};
 
 const getDetailCampaign = (obj: any): CampaignDraft => {
   return {
@@ -184,51 +419,55 @@ const getDetailCampaign = (obj: any): CampaignDraft => {
     intervalRepeat: validateIntervalRepeat(obj.intervalRepeat),
     providerId: null,
     accountId: null,
-    status: 'Draft',
-  }
-}
+    status: "Draft",
+  };
+};
 
 const convertStringForDate = (value: string) => {
   if (!value) {
-    return
+    return;
   }
   const date = new Date(value);
-  return date.toISOString()
-}
+  return date.toISOString();
+};
 
 const validateIntervalRepeat = (value: string) => {
-  if (value == "Diário") return 1
-  if (value == "Semanal") return 7
-  if (value == "Mensal") return 30
-}
+  if (value == "Diário") return 1;
+  if (value == "Semanal") return 7;
+  if (value == "Mensal") return 30;
+};
 
 const validateIntervalMessage = (value: string) => {
   const interval = getInterval(value);
-  if (interval === 5) return "00:05"
-  if (interval === 3) return "00:03"
-  if (interval === 2) return "00:02"
-  if (interval === 1) return "00:01"
-}
+  if (interval === 5) return "00:05";
+  if (interval === 3) return "00:03";
+  if (interval === 2) return "00:02";
+  if (interval === 1) return "00:01";
+};
 
 const getInterval = (value: string) => {
   const match = value.match(/\d+/);
   return match ? parseInt(match[0], 10) : null;
-}
+};
 
 const validateTime = (startTime: string, endTime: string) => {
   const time1 = new Date(`1970-01-01T${startTime}:00Z`);
   const time2 = new Date(`1970-01-01T${endTime}:00Z`);
   if (endTime < startTime) {
-    $toast.error('Horário de envio final não pode ser menor que inicial!!');
-    return false
+    $toast.error("Horário de envio final não pode ser menor que inicial!!");
+    return false;
   }
-  const differenceInMinutes = Math.abs((time2.getTime() - time1.getTime()) / 1000 / 60);
+  const differenceInMinutes = Math.abs(
+    (time2.getTime() - time1.getTime()) / 1000 / 60
+  );
   if (differenceInMinutes < 60) {
-    $toast.error('Horário do início da campanha deve ser pelo menos 1 hora antes do fim da campanha!');
-    return false
+    $toast.error(
+      "Horário do início da campanha deve ser pelo menos 1 hora antes do fim da campanha!"
+    );
+    return false;
   }
-  return true
-}
+  return true;
+};
 
 const extractNumbers = (inputString: string) => {
   const rawNumber = String(inputString).replace(/[^0-9]/g, "");
@@ -237,7 +476,7 @@ const extractNumbers = (inputString: string) => {
     (rawNumber.length > 11 && !rawNumber.startsWith("55"))
   ) {
     $toast.error("Número inválido: tamanho incorreto.");
-    return ""
+    return "";
   }
   const completeNumber = rawNumber.startsWith("55")
     ? rawNumber
@@ -263,15 +502,20 @@ const handleFileUpload = (event: any) => {
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
     const headerRow: any = jsonData[0];
-    const columnIndex = headerRow.findIndex((header: any) => header === "numeros");
+    const columnIndex = headerRow.findIndex(
+      (header: any) => header === "numeros"
+    );
 
     if (columnIndex !== -1) {
-      const numbers = jsonData.slice(1).map((row: any) => row[columnIndex]).filter((item) => item !== undefined);
+      const numbers = jsonData
+        .slice(1)
+        .map((row: any) => row[columnIndex])
+        .filter((item) => item !== undefined);
       const formattedNumbers = numbers.map((item) => extractNumbers(item));
       const validNumbers = formattedNumbers.filter((number) => number !== "");
       shippingNumbers.value.push(...validNumbers);
     } else {
-      $toast.error('Coluna NUMERO não encontrada.');
+      $toast.error("Coluna NUMERO não encontrada.");
     }
 
     if (fileInput.value) {
@@ -282,11 +526,9 @@ const handleFileUpload = (event: any) => {
   reader.readAsArrayBuffer(file);
 };
 
-
 watch(selectedContacts, () => {
-  shippingNumbers.value = []
+  shippingNumbers.value = [];
 });
-
 </script>
 
 <template>
@@ -304,6 +546,7 @@ watch(selectedContacts, () => {
 
       <VWindow v-model="currentStep" class="disable-tab-transition">
         <VWindowItem>
+          <!-- STEP ONE -->
           <VForm ref="refStepOne" @submit.prevent="validateStepOne">
             <VRow>
               <VCol cols="12">
@@ -311,57 +554,63 @@ watch(selectedContacts, () => {
                   Informações da campanha
                 </h6>
                 <p class="mb-0">
-                  Preencha os dados essenciais, escolha o tipo, defina a recorrência, agende
-                  os disparos e estabeleça o intervalo de tempo.
+                  Preencha os dados essenciais, escolha o tipo, defina a
+                  recorrência, agende os disparos e estabeleça o intervalo de
+                  tempo.
                 </p>
               </VCol>
 
               <VCol cols="12">
-                <VLabel class="mb-1 text-body-2 text-wrap " style="line-height: 15px;" text="TÍtulo da campanha *" />
-                <AppTextField v-model="stepOneForm.nameCampaign" placeholder="" :rules="[requiredValidator]" />
+                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px" text="TÍtulo da campanha *" />
+                <AppTextField v-model="stepOneForm.nameCampaign" placeholder="" />
               </VCol>
 
               <VCol cols="12">
-                <VLabel class="mb-1 text-body-2 text-wrap " style="line-height: 15px;" text="Tipo da campanha" />
+                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px" text="Tipo da campanha" />
                 <CustomRadios v-model:selected-radio="stepOneForm.typeCampaign" :radio-content="radioContent"
                   :grid-column="{ sm: '6', cols: '12' }" />
               </VCol>
 
               <VCol cols="12" md="6">
-                <VLabel class="mb-1 text-body-2 text-wrap " style="line-height: 15px;" text="Início da campanha *" />
+                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px" text="Início da campanha *" />
                 <AppDateTimePicker v-model="stepOneForm.dataStart" placeholder="DD/MM/AAAA HH:MM"
-                  :config="{ enableTime: true, dateFormat: 'Y-m-d H:i' }" :rules="[requiredValidator]" />
+                  :config="{ enableTime: true, dateFormat: 'Y-m-d H:i' }" />
               </VCol>
 
               <VCol cols="12" md="6" v-if="stepOneForm.typeCampaign == 'recorrente'">
-                <VLabel class="mb-1 text-body-2 text-wrap " style="line-height: 15px;" text="Fim da campanha *" />
+                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px" text="Fim da campanha *" />
                 <AppDateTimePicker v-model="stepOneForm.dataEnd" placeholder="DD/MM/AAAA HH:MM"
-                  :config="{ enableTime: true, dateFormat: 'Y-m-d H:i' }" :rules="[requiredValidator]" />
+                  :config="{ enableTime: true, dateFormat: 'Y-m-d H:i' }" />
               </VCol>
 
               <VCol cols="12" md="6">
-                <VLabel class="mb-1 text-body-2 text-wrap " style="line-height: 15px;"
+                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px"
                   text=" Tempo de disparo das mensagens *" />
                 <AppSelect :items="breakMessage" v-model="stepOneForm.messageBreak"
-                  placeholder="Escolha o tempo de disparos das mensagens" :rules="[requiredValidator]" />
+                  placeholder="Escolha o tempo de disparos das mensagens" />
               </VCol>
 
               <VCol cols="12" md="6" v-if="stepOneForm.typeCampaign == 'recorrente'">
-                <VLabel class="mb-1 text-body-2 text-wrap " style="line-height: 15px;"
-                  text=" Período de recorrência *" />
+                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px" text=" Período de recorrência *" />
                 <AppSelect :items="recurrencePeriod" placeholder="Selecione" v-model="stepOneForm.intervalRepeat" />
               </VCol>
 
               <VCol cols="12" md="6">
-                <VLabel class="mb-1 text-body-2 text-wrap " style="line-height: 15px;" text="Horário de envio *" />
-                <AppDateTimePicker v-model="stepOneForm.startTime" placeholder="Selecione o horario"
-                  :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }" :rules="[requiredValidator]" />
+                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px" text="Horário de envio *" />
+                <AppDateTimePicker v-model="stepOneForm.startTime" placeholder="Selecione o horario" :config="{
+                  enableTime: true,
+                  noCalendar: true,
+                  dateFormat: 'H:i',
+                }" />
               </VCol>
 
               <VCol cols="12" md="6">
-                <VLabel class="mb-1 text-body-2 text-wrap " style="line-height: 15px;" text="" />
-                <AppDateTimePicker v-model="stepOneForm.endTime" placeholder="Selecione o horario"
-                  :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }" :rules="[requiredValidator]" />
+                <VLabel class="mb-1 text-body-2 text-wrap" style="line-height: 15px" text="" />
+                <AppDateTimePicker v-model="stepOneForm.endTime" placeholder="Selecione o horario" :config="{
+                  enableTime: true,
+                  noCalendar: true,
+                  dateFormat: 'H:i',
+                }" />
               </VCol>
 
               <VCol cols="12">
@@ -381,15 +630,14 @@ watch(selectedContacts, () => {
         </VWindowItem>
 
         <VWindowItem>
+          <!-- STEP TWO -->
           <VForm ref="refStepTwo" @submit.prevent="validateStepTwo">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium">
-                  Público-alvo
-                </h6>
+                <h6 class="text-h6 font-weight-medium">Público-alvo</h6>
                 <p class="mb-0">
-                  Defina a lista de contatos para onde serão enviadas as mensagens da
-                  campanha.
+                  Defina a lista de contatos para onde serão enviadas as
+                  mensagens da campanha.
                 </p>
               </VCol>
 
@@ -419,8 +667,8 @@ watch(selectedContacts, () => {
 
                 <VRow class="d-flex ga-2">
                   <VCol cols="12" class="mt-4 mr-1">
-                    <VLabel v-if="shippingNumbers.length > 0" class="mb-1 text-body-2 text-wrap "
-                      style="line-height: 10px;" text="Números adicionados" />
+                    <VLabel v-if="shippingNumbers.length > 0" class="mb-1 text-body-2 text-wrap"
+                      style="line-height: 10px" text="Números adicionados" />
                   </VCol>
                   <div v-for="item in shippingNumbers" :key="item" class="mb-1">
                     <VChip color="blue" text-color="white" class="ml-3" label>
@@ -434,13 +682,13 @@ watch(selectedContacts, () => {
               <VCol cols="12" v-if="selectedContacts == 'import'">
                 <VFileInput label=" Clique aqui para escolher um arquivo" density="compact" ref="fileInput"
                   @change="handleFileUpload" />
-                <VLabel class="mt-5 text-body-2 text-wrap " style="line-height: 15px;" text="Obs: Permitido arquivos .csv ou .xlsx(Exel) com a coluna
+                <VLabel class="mt-5 text-body-2 text-wrap" style="line-height: 15px" text="Obs: Permitido arquivos .csv ou .xlsx(Exel) com a coluna
               'numeros'." />
 
                 <VRow class="d-flex ga-2">
                   <VCol cols="12" class="mt-4 mr-1">
-                    <VLabel v-if="shippingNumbers.length > 0" class="mb-1 text-body-2 text-wrap "
-                      style="line-height: 10px;" text="Números adicionados" />
+                    <VLabel v-if="shippingNumbers.length > 0" class="mb-1 text-body-2 text-wrap"
+                      style="line-height: 10px" text="Números adicionados" />
                   </VCol>
                   <div v-for="item in shippingNumbers" :key="item" class="mb-1">
                     <VChip color="blue" text-color="white" class="ml-1" label>
@@ -478,36 +726,110 @@ watch(selectedContacts, () => {
           <VForm ref="refAddressForm" @submit.prevent="validateAddressForm">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium">
-                  Caixa de saída
-                </h6>
+                <h6 class="text-h6 font-weight-medium">Caixa de saída</h6>
                 <p class="mb-0">
-                  Escolha a caixa de saída que será utilizada para enviar mensagens
+                  Escolha a caixa de saída que será utilizada para enviar
+                  mensagens
                 </p>
               </VCol>
 
-              <VCol cols="12">
+              <VCol cols="12" v-if="!products.length">
                 <AppTextField v-model="nameProvider" clearable label="Nome da caixa."
                   placeholder="Insira um nome para caixa de saída" type="text" :hide-spin-buttons="true"
                   class="textfield-demo-icon-slot" :rules="[requiredValidator]">
-                  <!-- AppendInner -->
-                  <template #append-inner>
-                    <VFadeTransition leave-absolute>
-                      <VProgressCircular v-if="loading" color="primary" width="3" size="24" indeterminate />
-
-                      <VNodeRenderer v-else class="text-2xl" :nodes="themeConfig.app.logo" />
-                    </VFadeTransition>
-                  </template>
                   <!-- Append -->
                   <template #append>
                     <VBtn :icon="$vuetify.display.smAndDown" @click="createProvider">
-                      <span v-if="$vuetify.display.mdAndUp" class="ms-3">Criar caixa</span>
+                      <span class="ms-3">Criar caixa</span>
                     </VBtn>
                   </template>
                 </AppTextField>
               </VCol>
 
+              <VCol cols="12">
+                <VDivider />
 
+                <div class="d-flex flex-wrap gap-4 ma-6">
+                  <div class="d-flex align-center">
+                    <!-- 👉 Search  -->
+                    <AppTextField v-model="searchQuery" placeholder="Pesquise conexão" style="inline-size: 500px"
+                      class="me-3" />
+                  </div>
+
+                  <VSpacer />
+                  <div class="d-flex gap-4 flex-wrap align-center">
+                    <VBtn color="primary" prepend-icon="tabler-plus"
+                      @click="$router.push('/apps/ecommerce/product/add')">
+                      Add Product
+                    </VBtn>
+                  </div>
+                </div>
+
+                <VDivider class="mt-4" />
+
+                <!-- 👉 Datatable  -->
+                <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows"
+                  v-model:page="page" :headers="headers" :items="providers" :items-length="totalProduct"
+                  class="text-no-wrap" @update:options="updateOptions">
+                  <!-- product  -->
+                  <template #item.product="{ item }">
+                    <div class="d-flex align-center gap-x-4">
+                      <VAvatar v-if="item.profilePictureUrl" size="38" variant="tonal" rounded
+                        :image="item.profilePictureUrl" />
+                      <div class="d-flex flex-column">
+                        <span class="text-body-1 font-weight-medium text-high-emphasis">{{ item.name }}</span>
+                        <span class="text-body-2">{{
+                          item.owner ?? "Desconectado"
+                        }}</span>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- category -->
+                  <!-- <template #item.category="{ item }">
+                    <VAvatar size="30" variant="tonal" :color="resolveCategory(item.category)?.color" class="me-4">
+                      <VIcon :icon="resolveCategory(item.category)?.icon" size="18" />
+                    </VAvatar>
+                    <span class="text-body-1 text-high-emphasis">{{ item.category }}</span>
+                  </template> -->
+
+                  <!-- stock -->
+                  <!-- <template #item.stock="{ item }">
+                    <VSwitch :model-value="item.stock" />
+                  </template> -->
+
+                  <!-- status -->
+                  <template #item.status="{ item }">
+                    <VChip v-bind="resolveStatus(item.status)" density="default" label size="small" />
+                  </template>
+
+                  <!-- Actions -->
+                  <template #item.actions="{ item }">
+                    <IconBtn>
+                      <VIcon icon="tabler-edit" />
+                    </IconBtn>
+
+                    <IconBtn>
+                      <VIcon icon="tabler-dots-vertical" />
+                      <VMenu activator="parent">
+                        <VList>
+                          <VListItem v-if="item.status == `close`" value="download" prepend-icon="tabler-refresh">
+                            Reconectar
+                          </VListItem>
+                          <VListItem v-else value="download" prepend-icon="tabler-refresh-off">
+                            Desconectar
+                          </VListItem>
+                        </VList>
+                      </VMenu>
+                    </IconBtn>
+                  </template>
+
+                  <!-- pagination -->
+                  <template #bottom>
+                    <TablePagination v-model:page="page" :items-per-page="itemsPerPage" :total-items="totalProduct" />
+                  </template>
+                </VDataTableServer>
+              </VCol>
 
               <VCol cols="12">
                 <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
@@ -536,19 +858,17 @@ watch(selectedContacts, () => {
           <VForm ref="refSocialLinkForm" @submit.prevent="validateSocialLinkForm">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium">
-                  Mensagem
-                </h6>
+                <h6 class="text-h6 font-weight-medium">Mensagem</h6>
                 <p class="mb-0">
-                  Escreva a mensagem que será enviada na campanha. Pode adicionar arquivos,
-                  emojis, entre outras personalizações, semelhante as mensagens do WhatsApp.
+                  Escreva a mensagem que será enviada na campanha. Pode
+                  adicionar arquivos, emojis, entre outras personalizações,
+                  semelhante as mensagens do WhatsApp.
                 </p>
               </VCol>
 
               <VCol cols="12">
                 <MessageComponent />
               </VCol>
-
 
               <VCol cols="12">
                 <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
@@ -575,9 +895,7 @@ watch(selectedContacts, () => {
 
         <VWindowItem>
           <div class="text-base">
-            <h6 class="text-base font-weight-medium mb-2">
-              Account
-            </h6>
+            <h6 class="text-base font-weight-medium mb-2">Account</h6>
 
             <p class="mb-1">
               {{ stepOneForm.nameCampaign }}
@@ -588,9 +906,7 @@ watch(selectedContacts, () => {
 
             <VDivider class="my-4" />
 
-            <h6 class="text-base font-weight-medium mb-2">
-              Personal Info
-            </h6>
+            <h6 class="text-base font-weight-medium mb-2">Personal Info</h6>
 
             <p class="mb-1">
               {{ personalForm.firstName }}
@@ -607,9 +923,7 @@ watch(selectedContacts, () => {
 
             <VDivider class="my-4" />
 
-            <h6 class="text-base font-weight-medium mb-2">
-              Address
-            </h6>
+            <h6 class="text-base font-weight-medium mb-2">Address</h6>
 
             <p class="mb-1">
               {{ addressForm.address }}
@@ -626,9 +940,7 @@ watch(selectedContacts, () => {
 
             <VDivider class="my-4" />
 
-            <h6 class="text-base font-weight-medium mb-2">
-              Social Links
-            </h6>
+            <h6 class="text-base font-weight-medium mb-2">Social Links</h6>
 
             <p class="mb-1">
               {{ socialForm.twitter }}
