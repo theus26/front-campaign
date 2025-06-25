@@ -1,10 +1,4 @@
-export interface IProvider {
-  credential: string | null
-  name: string
-  accounId: string
-}
-
-export interface MessageData  {
+export interface MessageData {
   type: string;
   message?: string;
   mediatype?: string;

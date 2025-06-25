@@ -6,53 +6,43 @@ interface Props {
   confirmMsg: string
   cancelTitle: string
   cancelMsg: string
+  showSuccess: boolean
+  showCancel: boolean
 }
 
 interface Emit {
   (e: 'update:isDialogVisible', value: boolean): void
-  (e: 'confirm', value: boolean): void
+  (e: 'confirm'): void
+  (e: 'cancel'): void
+  (e: 'update:showSuccess', value: boolean): void
+  (e: 'update:showCancel', value: boolean): void
 }
 
 const props = defineProps<Props>()
-
 const emit = defineEmits<Emit>()
-
-const unsubscribed = ref(false)
-const cancelled = ref(false)
 
 const updateModelValue = (val: boolean) => {
   emit('update:isDialogVisible', val)
 }
 
 const onConfirmation = () => {
-  emit('confirm', true)
+  emit('confirm')
   updateModelValue(false)
-  unsubscribed.value = true
 }
 
 const onCancel = () => {
-  emit('confirm', false)
-  emit('update:isDialogVisible', false)
-  cancelled.value = true
+  emit('cancel')
+  updateModelValue(false)
 }
 </script>
 
 <template>
-  <!-- 👉 Confirm Dialog -->
-  <VDialog
-    max-width="500"
-    :model-value="props.isDialogVisible"
-    @update:model-value="updateModelValue"
-  >
+  <!-- Dialog de confirmação -->
+  <VDialog max-width="500" :model-value="props.isDialogVisible" @update:model-value="updateModelValue">
     <VCard class="text-center px-10 py-6">
       <VCardText>
-        <VBtn
-          icon
-          variant="outlined"
-          color="warning"
-          class="my-4"
-          style=" block-size: 88px;inline-size: 88px; pointer-events: none;"
-        >
+        <VBtn icon variant="outlined" color="warning" class="my-4"
+          style=" block-size: 88px;inline-size: 88px; pointer-events: none;">
           <span class="text-5xl">!</span>
         </VBtn>
 
@@ -62,87 +52,45 @@ const onCancel = () => {
       </VCardText>
 
       <VCardText class="d-flex align-center justify-center gap-2">
-        <VBtn
-          variant="elevated"
-          @click="onConfirmation"
-        >
-          Confirm
-        </VBtn>
-
-        <VBtn
-          color="secondary"
-          variant="tonal"
-          @click="onCancel"
-        >
-          Cancel
-        </VBtn>
+        <VBtn variant="elevated" @click="onConfirmation">Confirmar</VBtn>
+        <VBtn color="secondary" variant="tonal" @click="onCancel">Cancelar</VBtn>
       </VCardText>
     </VCard>
   </VDialog>
 
-  <!-- Unsubscribed -->
-  <VDialog
-    v-model="unsubscribed"
-    max-width="500"
-  >
+  <!-- Sucesso -->
+  <VDialog :model-value="props.showSuccess" @update:model-value="val => emit('update:showSuccess', val)"
+    max-width="500">
     <VCard>
       <VCardText class="text-center px-10 py-6">
-        <VBtn
-          icon
-          variant="outlined"
-          color="success"
-          class="my-4"
-          style=" block-size: 88px;inline-size: 88px; pointer-events: none;"
-        >
-          <VIcon
-            icon="tabler-check"
-            size="38"
-          />
+        <VBtn icon variant="outlined" color="success" class="my-4"
+          style=" block-size: 88px;inline-size: 88px; pointer-events: none;">
+          <VIcon icon="tabler-check" size="38" />
         </VBtn>
 
-        <h1 class="text-h4 mb-4">
-          {{ props.confirmTitle }}
-        </h1>
-
+        <h1 class="text-h4 mb-4">{{ props.confirmTitle }}</h1>
         <p>{{ props.confirmMsg }}</p>
 
-        <VBtn
-          color="success"
-          @click="unsubscribed = false"
-        >
+        <VBtn color="success" @click="emit('update:showSuccess', false)">
           Ok
         </VBtn>
       </VCardText>
     </VCard>
   </VDialog>
 
-  <!-- Cancelled -->
-  <VDialog
-    v-model="cancelled"
-    max-width="500"
-  >
+  <!-- Cancelado -->
+  <VDialog :model-value="props.showCancel" @update:model-value="val => emit('update:showCancel', val)" max-width="500">
     <VCard>
       <VCardText class="text-center px-10 py-6">
-        <VBtn
-          icon
-          variant="outlined"
-          color="error"
-          class="my-4"
-          style=" block-size: 88px;inline-size: 88px; pointer-events: none;"
-        >
+        <VBtn icon variant="outlined" color="error" class="my-4"
+          style=" block-size: 88px;inline-size: 88px; pointer-events: none;">
           <span class="text-5xl font-weight-light">X</span>
         </VBtn>
 
-        <h1 class="text-h4 mb-4">
-          {{ props.cancelTitle }}
-        </h1>
-
+        <h1 class="text-h4 mb-4">{{ props.cancelTitle }}</h1>
         <p>{{ props.cancelMsg }}</p>
 
-        <VBtn
-          color="success"
-          @click="cancelled = false"
-        >
+        <VBtn color="success" @click="emit('update:showCancel', false)">
           Ok
         </VBtn>
       </VCardText>
