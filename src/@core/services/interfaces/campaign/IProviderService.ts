@@ -3,6 +3,7 @@ export interface IProviderService {
   createProvider(provider: IProvider): Promise<string>;
   connectInstance(instanceName: string): Promise<IConnectInstance>;
   removeProvider(providerId: string): Promise<void>;
+  logoutProvider(providerId: string): Promise<void>;
   getProvidersByAccountId(accountId: string): Promise<IProviderGeneric[]>;
 }
 
@@ -10,6 +11,7 @@ export type IProviderConfig = {
   createProvider: string;
   connectInstance: string;
   removeProvider: string;
+  logoutProvider: string;
   getProvidersByAccountId: string;
 };
 

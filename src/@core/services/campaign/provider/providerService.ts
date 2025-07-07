@@ -30,6 +30,11 @@ export default class ProviderService
     this.axiosIns = axiosIns;
     this.useAuth.configureInterceptorsAxiosInstance(this.axiosIns);
   }
+  async logoutProvider(providerId: string): Promise<void> {
+    await this.axiosIns.delete(this.serviceProviderConfig.logoutProvider, {
+      params: { providerId },
+    });
+  }
   async removeProvider(providerId: string): Promise<void> {
     await this.axiosIns.delete(this.serviceProviderConfig.removeProvider, {
       params: { providerId },

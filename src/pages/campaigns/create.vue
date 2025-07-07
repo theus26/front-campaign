@@ -4,7 +4,6 @@ import useProvider from "@/services/provider/useProvider";
 import type { CampaignDraft } from "@/store/campaign";
 import { useCampaignStore } from "@/store/campaign";
 import type { CustomInputContent } from "@core/types";
-import type { ECommerceProduct } from "@db/apps/ecommerce/types";
 import customWizardAccount from "@images/svg/wizard-account.svg";
 import customWizardAddress from "@images/svg/wizard-address.svg";
 import customWizardPersonal from "@images/svg/wizard-personal.svg";
@@ -42,7 +41,9 @@ const pro = ref<IProviderGeneric[]>([]);
 const reconectarDialog = ref(false);
 const desconectarDialog = ref(false);
 const editarProviderDialog = ref(false);
+const excluirProviderDialog = ref(false)
 const addProviderDialog = ref(false);
+const conectarDialog = ref(false)
 const editedItem = ref<IProviderGeneric>(defaultItem.value);
 const editedIndex = ref(-1);
 const selectedRow = ref(null);
@@ -58,6 +59,12 @@ const reconectarProvider = (item: IProviderGeneric) => {
   editedIndex.value = pro.value.indexOf(item);
   editedItem.value = { ...item };
   reconectarDialog.value = true;
+};
+
+const excluirProvider = (item: IProviderGeneric) => {
+  editedIndex.value = pro.value.indexOf(item);
+  editedItem.value = { ...item };
+  excluirProviderDialog.value = true;
 };
 
 const conectarProvider = (item: IProviderGeneric) => {
@@ -121,25 +128,6 @@ const resolveStatus = (statusMsg: string) => {
   if (statusMsg === "close") return { text: "Desconectado", color: "error" };
 };
 
-const { data: productsData, execute: fetchProducts } = await useApi<any>(
-  createUrl("/apps/ecommerce/products", {
-    query: {
-      q: searchQuery,
-      stock: selectedStock,
-      category: selectedCategory,
-      status: selectedStatus,
-      page,
-      itemsPerPage,
-      sortBy,
-      orderBy,
-    },
-  })
-);
-
-const products = computed(
-  (): ECommerceProduct[] => productsData.value.products
-);
-const totalProduct = computed(() => productsData.value.total);
 
 const $toast = useToast();
 const campaignStore = useCampaignStore();
@@ -252,17 +240,24 @@ const addNumber = () => {
 
 const createProvider = async () => {
   try {
+    loading.value = true
     const providerNew: IProvider = {
       name: nameProvider.value,
       credential: nameProvider.value + "_" + "account" + "_" + "cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
       accountId: "cd777da1-e9ae-4c3c-9fea-1e0c6ca14378"
     }
     const base64 = await useProvider.createProvider(providerNew)
-    reconectarDialog.value = true
+    conectarDialog.value = true
     img.value = base64
 
   } catch (error) {
     console.error("Erro ao carregar providers:", error);
+  }
+  finally {
+    loading.value = false
+    setTimeout(() => {
+      conectarDialog.value = true
+    }, 5000)
   }
 };
 
@@ -462,21 +457,9 @@ const loadProviders = async () => {
   }
 };
 
-const newConexao = async () => {
-  try {
-    const providerNew: IProvider = {
-      name: nameProvider.value,
-      credential: nameProvider.value + "_" + "account" + "_" + "cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
-      accountId: "cd777da1-e9ae-4c3c-9fea-1e0c6ca14378"
-    }
-    const base64 = await useProvider.createProvider(providerNew)
-    reconectarDialog.value = true
-    img.value = base64
+const totalProviders = computed(() => loadProviders.length)
 
-  } catch (error) {
-    console.error("Erro ao carregar providers:", error);
-  }
-}
+
 
 const desconectarConexao = async (provider: IProviderGeneric) => {
   editedIndex.value = pro.value.indexOf(provider);
@@ -491,14 +474,23 @@ const handleConfirm = async () => {
 
     if (!editedItem.value?.providerId) return;
 
-    await useProvider.removeProvider(editedItem.value.providerId);
+    if (desconectarDialog.value) {
+      await useProvider.logoutProvider(editedItem.value.providerId);
+      showSuccessDialog.value = true;
+    }
 
-    showSuccessDialog.value = true; // ✅ Mostrar confirmação apenas após sucesso
+    if (excluirProviderDialog.value) {
+      await useProvider.removeProvider(editedItem.value.providerId);
+      showSuccessDialog.value = true;
+    }
+
+
   } catch (error) {
     console.error(error);
     showCancelDialog.value = true; // ou exibir erro como preferir
   } finally {
     loading.value = false;
+    loadProviders()
   }
 };
 
@@ -526,8 +518,8 @@ onMounted(() => {
       <!-- 👉 stepper content -->
 
       <VWindow v-model="currentStep" class="disable-tab-transition">
+        <!-- STEP ONE -->
         <VWindowItem>
-          <!-- STEP ONE -->
           <VForm ref="refStepOne" @submit.prevent="validateStepOne">
             <VRow>
               <VCol cols="12">
@@ -610,8 +602,8 @@ onMounted(() => {
           </VForm>
         </VWindowItem>
 
+        <!-- STEP TWO -->
         <VWindowItem>
-          <!-- STEP TWO -->
           <VForm ref="refStepTwo" @submit.prevent="validateStepTwo">
             <VRow>
               <VCol cols="12">
@@ -703,6 +695,7 @@ onMounted(() => {
           </VForm>
         </VWindowItem>
 
+        <!-- STEP THREE -->
         <VWindowItem>
           <VForm ref="refAddressForm" @submit.prevent="validateAddressForm">
             <VRow>
@@ -749,7 +742,7 @@ onMounted(() => {
 
                 <!-- 👉 Datatable  -->
                 <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows"
-                  v-model:page="page" :headers="headers" :items="providers" :items-length="totalProduct" return-object
+                  v-model:page="page" :headers="headers" :items="providers" :items-length="totalProviders" return-object
                   show-select class="text-no-wrap" @update:model-value="onSelectRow" @update:options="updateOptions">
                   <!-- product  -->
                   <template #item.product="{ item }">
@@ -760,7 +753,7 @@ onMounted(() => {
                         <span class="text-body-1 font-weight-medium text-high-emphasis">{{ item.name }}</span>
                         <span class="text-body-2">{{
                           item.owner ?? "Desconectado"
-                        }}</span>
+                          }}</span>
                       </div>
                     </div>
                   </template>
@@ -780,22 +773,32 @@ onMounted(() => {
                       <VIcon icon="tabler-dots-vertical" />
                       <VMenu activator="parent">
                         <VList>
-                          <VListItem v-if="item.status == `close`" value="download" prepend-icon="tabler-refresh"
-                            @click="reconectarProvider(item)">
-                            Reconectar
-                          </VListItem>
-                          <VListItem v-else value="download" prepend-icon="tabler-refresh-off"
-                            @click="desconectarConexao(item)">
-                            Desconectar
-                          </VListItem>
+                          <template v-if="item.status === 'close'">
+                            <VListItem value="reconnect" prepend-icon="tabler-refresh"
+                              @click="reconectarProvider(item)">
+                              Reconectar
+                            </VListItem>
+
+                            <VListItem value="delete" prepend-icon="tabler-trash" @click="excluirProvider(item)">
+                              Excluir
+                            </VListItem>
+                          </template>
+
+                          <template v-else>
+                            <VListItem value="disconnect" prepend-icon="tabler-refresh-off"
+                              @click="desconectarConexao(item)">
+                              Desconectar
+                            </VListItem>
+                          </template>
                         </VList>
+
                       </VMenu>
                     </IconBtn>
                   </template>
 
                   <!-- pagination -->
                   <template #bottom>
-                    <TablePagination v-model:page="page" :items-per-page="itemsPerPage" :total-items="totalProduct" />
+                    <TablePagination v-model:page="page" :items-per-page="itemsPerPage" :total-items="totalProviders" />
                   </template>
                 </VDataTableServer>
               </VCol>
@@ -823,6 +826,7 @@ onMounted(() => {
           </VForm>
         </VWindowItem>
 
+        <!-- STEP FOUR -->
         <VWindowItem>
           <VForm ref="refSocialLinkForm" @submit.prevent="validateSocialLinkForm">
             <VRow>
@@ -954,11 +958,41 @@ onMounted(() => {
       </VCard>
     </VDialog>
 
+    <!-- Conectar dialog -->
+    <VDialog :width="$vuetify.display.smAndDown ? 'auto' : 600" v-model="conectarDialog" max-width="600px" persistent>
+      <DialogCloseBtn @click="conectarDialog = false" />
+      <VCard title="Realizar conexão">
+        <VDivider />
+        <VCardText class="d-flex justify-center py-6">
+          <img :src="img" alt="QR Code para reconexão" class="rounded elevation-2" />
+        </VCardText>
+        <p class="text-caption text-center text-medium-emphasis mt-2">
+          Escaneie o QR Code com o WhatsApp para reconectar sua conta.
+        </p>
+      </VCard>
+    </VDialog>
+
     <!-- Desconectar Dialog -->
     <ConfirmDialog v-model:is-dialog-visible="desconectarDialog" v-model:showSuccess="showSuccessDialog"
       v-model:showCancel="showCancelDialog" confirmation-question="Tem certeza de que deseja desconectar esta conexão?"
       confirm-title="Desconectado!" confirm-msg="A conexão foi desconectada com sucesso." cancel-title="Cancelado"
       cancel-msg="A ação de desconectar a conexão foi cancelada." @confirm="handleConfirm" @cancel="handleCancel" />
+
+    <v-progress-linear v-if="loading" indeterminate color="primary" />
+
+    <!-- Snackbar para feedback -->
+    <v-snackbar v-model="snackbar.visible" :color="snackbar.color" :timeout="3000" location="center">
+      {{ snackbar.message }}
+    </v-snackbar>
+
+    <!-- Loading (se quiser usar) -->
+    <v-progress-linear v-if="loading" indeterminate color="primary" />
+
+    <!-- Excluir provider -->
+    <ConfirmDialog v-model:is-dialog-visible="excluirProviderDialog" v-model:showSuccess="showSuccessDialog"
+      v-model:showCancel="showCancelDialog" confirmation-question="Tem certeza de que deseja excluir esta conexão?"
+      confirm-title="Excluir!" confirm-msg="A conexão foi excluida com sucesso." cancel-title="Cancelado"
+      cancel-msg="A ação de excluir a conexão foi cancelada." @confirm="handleConfirm" @cancel="handleCancel" />
 
     <v-progress-linear v-if="loading" indeterminate color="primary" />
 
@@ -1006,7 +1040,7 @@ onMounted(() => {
             <VBtn color="error" variant="outlined" @click="addProviderDialog = false">
               Cancelar
             </VBtn>
-            <VBtn type="submit" @click="createProvider">
+            <VBtn type="submit" @click="createProvider" :loading="loading">
               Salvar
             </VBtn>
           </div>
