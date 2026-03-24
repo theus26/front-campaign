@@ -227,7 +227,7 @@ const chatContentContainerBg = computed(() => {
         <!-- Message form -->
         <VForm class="chat-log-message-form mb-5 mx-5" @submit.prevent="sendMessage">
           <VTextField :key="store.activeChat?.contact.id" v-model="msg" variant="solo" density="default"
-            class="chat-message-input" placeholder="Type your message..." autofocus>
+            class="chat-message-input" placeholder="Escreva sua mensagem" autofocus>
             <template #append-inner>
               <div class="d-flex gap-1">
                 <IconBtn @click="triggerFileSelection">
@@ -235,7 +235,7 @@ const chatContentContainerBg = computed(() => {
                 </IconBtn>
                 <div class="d-none d-md-block">
                   <VBtn append-icon="tabler-send" @click="sendMessage">
-                    Send
+                    Enviar
                   </VBtn>
                 </div>
                 <IconBtn class="d-block d-md-none" @click="sendMessage">
