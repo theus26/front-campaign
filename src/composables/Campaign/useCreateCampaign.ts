@@ -132,11 +132,11 @@ export function useCreateCampaign() {
       return false;
     }
     const differenceInMinutes = Math.abs(
-      (time2.getTime() - time1.getTime()) / 1000 / 60
+      (time2.getTime() - time1.getTime()) / 1000 / 60,
     );
     if (differenceInMinutes < 60) {
       $toast.error(
-        "Horário do início da campanha deve ser pelo menos 1 hora antes do fim da campanha!"
+        "Horário do início da campanha deve ser pelo menos 1 hora antes do fim da campanha!",
       );
       return false;
     }
@@ -267,7 +267,7 @@ export function useCreateCampaign() {
 
   const deleteNumber = (numero: string) => {
     shippingNumbers.value = shippingNumbers.value.filter(
-      (item) => item !== numero
+      (item) => item !== numero,
     );
   };
 
@@ -302,7 +302,7 @@ export function useCreateCampaign() {
           .filter((item) => item !== undefined && item !== null);
 
         const formattedNumbers = numbers.map((item: any) =>
-          extractNumbers(String(item))
+          extractNumbers(String(item)),
         );
         const validNumbers = formattedNumbers.filter((n) => n !== "");
         shippingNumbers.value.push(...validNumbers);
@@ -329,8 +329,8 @@ export function useCreateCampaign() {
     try {
       loading.value = true;
       // substitua accountId pelo real se precisar (ou passe como param)
-      const data = await useProvider.getProvidersByAccountId(
-        "cd777da1-e9ae-4c3c-9fea-1e0c6ca14378"
+      const data = await useProvider.getListProviders(
+        "cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
       );
       if (Array.isArray(data)) {
         provider.value = data;

@@ -12,7 +12,7 @@ import StepTwoContacts from './steps/StepTwoContacts.vue'
 
 
 import { iconsSteps as icons } from '@/@core/useCreateCampaign.const'
-import { useCreateCampaign } from '@/composables/useCreateCampaign'
+import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign'
 
 
 const { loading, isCurrentStepValid } = useCreateCampaign()

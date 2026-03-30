@@ -1,29 +1,10 @@
-<template>
-  <v-dialog v-model="isOpen" max-width="420">
-    <v-card>
-      <v-card-title class="text-h6 font-semibold">
-        Desconectar Provider
-      </v-card-title>
-      <v-card-text>
-        Deseja desconectar o provider
-        <strong>{{ providerName }}</strong>?
-      </v-card-text>
-      <v-card-actions class="justify-end">
-        <v-btn variant="text" @click="closeDialog">Cancelar</v-btn>
-        <v-btn color="warning" @click="handleDisconnect" :loading="loading">
-          Desconectar
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-</template>
-
 <script setup lang="ts">
+import { IProvider } from "@/@core/services/interfaces/campaign/IProviderService";
 import { ref, watch } from "vue";
 
 interface Props {
   modelValue: boolean;
-  providerName?: string;
+  provider?: IProvider | null;
 }
 
 const props = defineProps<Props>();
@@ -37,18 +18,56 @@ watch(
   (val) => (isOpen.value = val)
 );
 
-function closeDialog() {
+const closeDialog = () => {
   emit("update:modelValue", false);
-}
+};
 
-async function handleDisconnect() {
-  loading.value = true;
-  try {
-    await new Promise((r) => setTimeout(r, 1000));
-    emit("disconnected", props.providerName);
-    closeDialog();
-  } finally {
-    loading.value = false;
-  }
-}
+
 </script>
+
+<template>
+  <VDialog v-model="isOpen" max-width="420">
+    <DialogCloseBtn @click="closeDialog" />
+
+    <VCard>
+
+      <VCardTitle class="text-h6 font-weight-bold d-flex align-center gap-2">
+
+        Desconectar conexão
+      </VCardTitle>
+
+      <VCardText class="text-center">
+
+        <p class="mb-3">
+          Você está prestes a desconectar a conexão:
+        </p>
+
+        <div class="pa-3 rounded bg-grey-lighten-4 text-center mb-3 font-weight-medium">
+          {{ props.provider?.name || "Sem nome" }}
+        </div>
+
+        <p class="text-medium-emphasis text-sm mx-auto" style="max-width: 320px">
+          Após desconectar, será necessário escanear o QR Code novamente
+          para reconectar o WhatsApp.
+        </p>
+
+      </VCardText>
+
+      <VDivider />
+
+      <VCardActions class="justify-end">
+
+        <VBtn variant="text" @click="closeDialog">
+          Cancelar
+        </VBtn>
+
+        <VBtn color="warning" variant="flat" :loading="loading"
+          @click=" emit('disconnected', props.provider?.providerId)">
+          Desconectar
+        </VBtn>
+
+      </VCardActions>
+
+    </VCard>
+  </VDialog>
+</template>

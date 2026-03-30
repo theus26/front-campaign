@@ -1,10 +1,19 @@
+import { IPaginacao } from "../types";
+
 export interface IProviderService {
   serviceProviderConfig: IProviderConfig;
-  createProvider(provider: IProvider): Promise<string>;
+  createProvider(provider: ICreateProvider): Promise<string>;
+  updateProvider(
+    providerId: string,
+    updateData: IUpdateProvider,
+  ): Promise<void>;
   connectInstance(instanceName: string): Promise<IConnectInstance>;
   removeProvider(providerId: string): Promise<void>;
   logoutProvider(providerId: string): Promise<void>;
-  getProvidersByAccountId(accountId: string): Promise<IProviderGeneric[]>;
+  getListProviders(
+    filter: IProviderFilter,
+  ): Promise<IPaginacao<IProviderGeneric>>;
+  getConnectionState(instanceName: string): Promise<IConnectionState>;
 }
 
 export type IProviderConfig = {
@@ -12,10 +21,19 @@ export type IProviderConfig = {
   connectInstance: string;
   removeProvider: string;
   logoutProvider: string;
-  getProvidersByAccountId: string;
+  getListProviders: string;
+  getConnectionState: string;
+  updateProvider: string;
 };
 
 export interface IProvider {
+  name: string;
+  credential: string;
+  accountId: string;
+  providerId: string;
+}
+
+export interface ICreateProvider {
   name: string;
   credential: string;
   accountId: string;
@@ -37,4 +55,24 @@ export interface IProviderGeneric {
   owner: string | null;
   profileName: string | null;
   profilePictureUrl: string | null;
+}
+
+export interface IConnectionState {
+  instance?: Instance | null;
+}
+
+export interface Instance {
+  instanceName?: string | null;
+  state?: string | null;
+}
+
+export interface IProviderFilter {
+  accountId: string;
+  search?: string | null;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface IUpdateProvider {
+  name?: string;
 }

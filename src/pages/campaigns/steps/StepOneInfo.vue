@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { breakMessage, radioContent, recurrencePeriod } from '@/@core/useCreateCampaign.const';
-import { useCreateCampaign } from '@/composables/useCreateCampaign';
+import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
 import { ref } from 'vue';
 import { VForm } from 'vuetify/components';
 

@@ -5,7 +5,9 @@ const defaultConfig: IProviderConfig = {
   connectInstance: "messageTrigger/connectInstance",
   logoutProvider: "provider/logoutProvider",
   removeProvider: "provider/removeProvider",
-  getProvidersByAccountId: "provider/getProvidersByAccountId",
+  getListProviders: "provider/getProvidersByAccountId",
+  getConnectionState: "provider/getConnectionState",
+  updateProvider: "provider/updateProvider",
 };
 
 export default defaultConfig;

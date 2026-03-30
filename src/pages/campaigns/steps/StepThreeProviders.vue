@@ -1,36 +1,57 @@
 <script setup lang="ts">
-import { useCreateCampaign } from '@/composables/useCreateCampaign';
-import { useProvidersManager } from '@/composables/useProvidersManager';
-import { defineEmits, watch } from 'vue';
+import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
+import { useProvidersManager } from '@/composables/Provider/useProvidersManager';
+import * as vue from 'vue';
 import { VForm } from 'vuetify/components';
+import ConnectProviderDialog from '../dialogs/ConnectProviderDialog.vue';
+import DeleteProviderDialog from '../dialogs/DeleteProviderDialog.vue';
+import DisconnectProviderDialog from '../dialogs/DisconnectProviderDialog.vue';
+import EditProviderDialog from '../dialogs/EditProviderDialog.vue';
+import QrCodeModal from '../dialogs/QrCodeModal.vue';
+import ReconnectProviderDialog from '../dialogs/ReconnectProviderDialog.vue';
+
 
 const emit = defineEmits<{
-  (e: 'next'): void
-  (e: 'back'): void
-}>()
+  (e: "next"): void
+  (e: "back"): void
+}>();
+
+
 
 const formRef = ref<VForm | null>(null);
 
 // providers composable encapsulates provider logic
 const {
-  provider,
+  providers,
   loadProviders,
   createProvider,
   nameProvider,
+  selectedProvider,
   searchQuery,
   headers,
-  totalProviders,
+  totalRecords,
   itemsPerPage,
   page,
+  loading,
+  creatingLoading,
+  base64,
+  qrcodeModal,
+  openAddDialog,
+  editDialog,
+  deleteProviderDialog,
+  disconnectingProviderDialog,
+  reconetingProviderDialog,
   onSelectRow,
   updateOptions,
   resolveStatus,
-  editarItem,
+  openDialogEdit,
+  updateProvider,
   reconectarProvider,
   excluirProvider,
+  openDeleteDialog,
   desconectarConexao,
-  openAddDialog,
-  loading
+  openDisconnectDialog,
+  createNewProvider,
 } = useProvidersManager()
 
 const { validateStepThree, selectedRows } = useCreateCampaign()
@@ -55,7 +76,7 @@ const updateOptionsLocal = (options: any) => {
   updateOptions(options)
 }
 
-watch(searchQuery, () => {
+vue.watch(searchQuery, () => {
   // could debounce and call server filter if needed
 })
 
@@ -63,24 +84,17 @@ watch(searchQuery, () => {
 // life-cycle
 onMounted(async () => {
   await loadProviders()
-  console.log(provider);
+  console.log('provider');
 
 })
 
 // emit next handler (called by form submit)
 const onNext = async () => {
-  // ensure providers up-to-date
   validateStepThree(formRef.value)
-  //await loadProviders()
+  await loadProviders()
   emit('next')
 }
 
-const handleCreateProvider = async () => {
-  if (!nameProvider.value || nameProvider.value.trim().length === 0) return
-  await createProvider(nameProvider.value)
-  // after creation, refresh
-  await loadProviders()
-}
 </script>
 
 <template>
@@ -92,13 +106,13 @@ const handleCreateProvider = async () => {
       </VCol>
 
       <!-- When there are no providers -->
-      <VCol cols="12" v-if="!provider.length">
+      <VCol cols="12" v-if="!providers.length && !searchQuery">
         <AppTextField v-model="nameProvider" clearable label="Nome da caixa."
           placeholder="Insira um nome para caixa de saída" type="text" :hide-spin-buttons="true"
           class="textfield-demo-icon-slot" :rules="[requiredValidator]">
           <!-- Append -->
           <template #append>
-            <VBtn @click="createProvider" :disabled="nameProvider.length < 2">
+            <VBtn @click="createProvider()" :disabled="nameProvider.length < 2" :loading="creatingLoading">
               <span class="ms-3">Criar caixa</span>
             </VBtn>
           </template>
@@ -117,14 +131,14 @@ const handleCreateProvider = async () => {
 
           <VSpacer />
           <div class="d-flex gap-4 flex-wrap align-center">
-            <VBtn color="primary" prepend-icon="tabler-plus" @click="openAddDialog">Nova conexão</VBtn>
+            <VBtn color="primary" prepend-icon="tabler-plus" @click="openAddDialog = true">Nova conexão</VBtn>
           </div>
         </div>
 
         <VDivider class="mt-4" />
 
         <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" v-model:page="page"
-          :headers="headers" :items="provider" :items-length="totalProviders" return-object show-select
+          :headers="headers" :items="providers" :items-length="totalRecords" return-object show-select
           class="text-no-wrap" @update:model-value="onSelectRowLocal" @update:options="updateOptionsLocal">
           <template #item.product="{ item }">
             <div class="d-flex align-center gap-x-4">
@@ -142,7 +156,7 @@ const handleCreateProvider = async () => {
           </template>
 
           <template #item.actions="{ item }">
-            <IconBtn @click="editarItem(item)">
+            <IconBtn @click="openDialogEdit(item)">
               <VIcon icon="tabler-edit" />
             </IconBtn>
 
@@ -155,13 +169,13 @@ const handleCreateProvider = async () => {
                       Reconectar
                     </VListItem>
 
-                    <VListItem value="delete" prepend-icon="tabler-trash" @click="excluirProvider(item)">
+                    <VListItem value="delete" prepend-icon="tabler-trash" @click="openDeleteDialog(item)">
                       Excluir
                     </VListItem>
                   </template>
 
                   <template v-else>
-                    <VListItem value="disconnect" prepend-icon="tabler-refresh-off" @click="desconectarConexao(item)">
+                    <VListItem value="disconnect" prepend-icon="tabler-refresh-off" @click="openDisconnectDialog(item)">
                       Desconectar
                     </VListItem>
                   </template>
@@ -171,7 +185,7 @@ const handleCreateProvider = async () => {
           </template>
 
           <template #bottom>
-            <TablePagination v-model:page="page" :items-per-page="itemsPerPage" :total-items="totalProviders" />
+            <TablePagination v-model:page="page" :items-per-page="itemsPerPage" :total-items="totalRecords" />
           </template>
         </VDataTableServer>
       </VCol>
@@ -195,4 +209,16 @@ const handleCreateProvider = async () => {
       </VCol>
     </VRow>
   </VForm>
+
+  <QrCodeModal v-model="qrcodeModal" :base64="base64" :name="nameProvider" @next="onNext" />
+  <ConnectProviderDialog v-model="openAddDialog" :creating-loading="creatingLoading" @loadProvieders="loadProviders"
+    @create-new-provider="createNewProvider" />
+  <EditProviderDialog v-model="editDialog" :provider="selectedProvider" :loading="loading"
+    @update="updateProvider($event)" />
+  <DeleteProviderDialog v-model="deleteProviderDialog" :provider="selectedProvider" :loading="loading"
+    @delete="excluirProvider($event)" />
+  <DisconnectProviderDialog v-model="disconnectingProviderDialog" :provider="selectedProvider" :loading="loading"
+    @disconnected="desconectarConexao($event)" />
+  <ReconnectProviderDialog v-model="reconetingProviderDialog" />
+
 </template>

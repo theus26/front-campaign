@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCreateCampaign } from '@/composables/useCreateCampaign'
+import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign'
 import { computed, ref } from 'vue'
 import MessageComponent from '../components/message.vue'
 //import { useCreateCampaignStore } from '../store/createCampaignStore' // optional: if you use the new store
