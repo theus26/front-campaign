@@ -11,7 +11,6 @@ const fileInput = ref<HTMLInputElement | null>(null)
 
 
 const onNext = async () => {
-  console.log(formRef.value);
 
   await validateStepTwo(formRef.value)
   emit('next');

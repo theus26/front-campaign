@@ -8,16 +8,24 @@ import axios from "axios";
 import { ref } from "vue";
 import { useToast } from "vue-toast-notification";
 import { useListProviderComposable } from "./useListProviderComposable";
+import { VForm } from "vuetify/components";
 
 export function useProvidersManager() {
   const toast = useToast();
+  const emit = defineEmits<{
+  (e: "next"): void
+  (e: "back"): void
+}>();
 
+  const selectedProvider = ref<IProvider | null>(null);
+  const formRef = ref<VForm | null>(null);
+  
   const itemsPerPage = ref(10);
   const page = ref(1);
   const searchQuery = ref("");
   const nameProvider = ref("");
-  const selectedProvider = ref<IProvider | null>(null);
   const base64 = ref("");
+  const reconnectBase64 = ref("");
   const qrcodeModal = ref(false);
   const creatingLoading = ref(false);
   const openAddDialog = ref(false);
@@ -53,7 +61,7 @@ export function useProvidersManager() {
       };
 
       const response = await useProvider.createProvider(provider);
-      base64.value = response;
+      base64.value = response ?? "";
       qrcodeModal.value = true;
     } catch (err) {
       console.error("Erro ao criar provider:", err);
@@ -90,6 +98,22 @@ export function useProvidersManager() {
     } catch (err) {
       console.error("Erro ao atualizar provider:", err);
       toast.error("Erro ao atualizar caixa de saída");
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const openReconnectDialog = async (item: IProvider) => {
+    try {
+      loading.value = true;
+      const data = await useProvider.connectInstance(item.name);
+
+      reconnectBase64.value = data.base64 ?? "";
+      selectedProvider.value = item;
+      reconetingProviderDialog.value = true;
+    } catch (err) {
+      console.error("Erro ao gerar QR Code para reconectar:", err);
+      toast.error("Erro ao gerar QR Code para reconectar");
     } finally {
       loading.value = false;
     }
@@ -156,6 +180,8 @@ export function useProvidersManager() {
     loadProviders();
   };
 
+  
+
   /**
    * Define qual provider foi selecionado (Step 3)
    */
@@ -191,6 +217,7 @@ export function useProvidersManager() {
     nameProvider,
     selectedProvider,
     base64,
+    reconnectBase64,
     qrcodeModal,
     editDialog,
     disconnectingProviderDialog,
@@ -208,12 +235,15 @@ export function useProvidersManager() {
     reconectarProvider,
     desconectarConexao,
     openDisconnectDialog,
+    openReconnectDialog,
     excluirProvider,
     openDeleteDialog,
     onSelectRow,
     updateOptions,
     resolveStatus,
     createNewProvider,
+    emit,
     openAddDialog,
+    formRef,
   };
 }

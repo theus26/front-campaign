@@ -83,11 +83,11 @@ export default class ProviderService
     return response.data;
   }
   async connectInstance(instanceName: string): Promise<IConnectInstance> {
-    var base64 = await this.axiosIns.get(
+    var response = await this.axiosIns.get(
       this.serviceProviderConfig.connectInstance,
       { params: { instanceName } },
     );
 
-    return base64.data;
+    return response.data;
   }
 }

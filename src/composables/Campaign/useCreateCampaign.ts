@@ -221,7 +221,6 @@ export function useCreateCampaign() {
   const validateStepThree = async (item: any) => {
     await item?.validate().then((valid: any) => {
       if (valid.valid) {
-        console.log(selectedRows.value);
         currentStep.value++;
         isCurrentStepValid.value = true;
       } else {
@@ -325,26 +324,26 @@ export function useCreateCampaign() {
   };
 
   // ---------- Providers loading / creation / reconnection ----------
-  const loadProviders = async () => {
-    try {
-      loading.value = true;
-      // substitua accountId pelo real se precisar (ou passe como param)
-      const data = await useProvider.getListProviders(
-        "cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
-      );
-      if (Array.isArray(data)) {
-        provider.value = data;
-        totalProviders.value = data.length;
-      } else {
-        provider.value = [];
-        totalProviders.value = 0;
-      }
-    } catch (err) {
-      console.error("Erro ao carregar providers:", err);
-    } finally {
-      loading.value = false;
-    }
-  };
+  // const loadProviders = async () => {
+  //   try {
+  //     loading.value = true;
+  //     // substitua accountId pelo real se precisar (ou passe como param)
+  //     const data = await useProvider.getListProviders(
+  //       "cd777da1-e9ae-4c3c-9fea-1e0c6ca14378",
+  //     );
+  //     if (Array.isArray(data)) {
+  //       provider.value = data;
+  //       totalProviders.value = data.length;
+  //     } else {
+  //       provider.value = [];
+  //       totalProviders.value = 0;
+  //     }
+  //   } catch (err) {
+  //     console.error("Erro ao carregar providers:", err);
+  //   } finally {
+  //     loading.value = false;
+  //   }
+  // };
 
   const createProvider = async () => {
     try {
@@ -446,7 +445,7 @@ export function useCreateCampaign() {
         showSuccessDialogExcluir.value = true;
       }
       // atualizar lista
-      await loadProviders();
+      //await loadProviders();
     } catch (err) {
       console.error(err);
       showCancelDialog.value = true;
@@ -528,7 +527,6 @@ export function useCreateCampaign() {
     searchQuery,
     selectedRows,
     providers: provider, // alias usado antes no template
-    loadProviders,
     createProvider,
     reconectarProvider,
     excluirProvider,

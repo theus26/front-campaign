@@ -29,6 +29,7 @@ const startTimer = async () => {
   clearTimeout(connectingTimeout)
 
   const state = await useProvider.getConnectionState(props.name)
+  console.log('state', state);
 
   const status = state?.instance?.state
 
@@ -121,20 +122,6 @@ const checkConnection = async () => {
 
     return
   }
-
-  // desconectou
-  if (status === "close") {
-
-    clearInterval(interval)
-    clearTimeout(qrTimeout)
-    clearTimeout(connectingTimeout)
-
-    $toast.warning("Dispositivo desconectado")
-
-    emit("update:modelValue", false)
-
-    return
-  }
 }
 
 async function reloadQrCode() {
@@ -144,7 +131,8 @@ async function reloadQrCode() {
   try {
     const data = await useProvider.connectInstance(props.name);
 
-    qrCodeBase64.value = data.base64;
+
+    qrCodeBase64.value = data.code ?? data.pairingCode ?? data.base64 ?? "";
 
     startTimer();
   } finally {
@@ -158,7 +146,9 @@ watch(
     isOpen.value = val;
 
     if (val) {
-      qrCodeBase64.value = props.base64;
+      console.log('watch');
+
+      qrCodeBase64.value = props.base64 ?? "";
       expired.value = false;
       startTimer();
     } else {

@@ -2,7 +2,7 @@ import { IProviderConfig } from "../../interfaces/campaign/IProviderService";
 
 const defaultConfig: IProviderConfig = {
   createProvider: "/provider/createProvider",
-  connectInstance: "messageTrigger/connectInstance",
+  connectInstance: "provider/connectInstance",
   logoutProvider: "provider/logoutProvider",
   removeProvider: "provider/removeProvider",
   getListProviders: "provider/getProvidersByAccountId",

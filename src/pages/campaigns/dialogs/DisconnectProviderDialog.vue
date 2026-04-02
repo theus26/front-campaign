@@ -5,17 +5,23 @@ import { ref, watch } from "vue";
 interface Props {
   modelValue: boolean;
   provider?: IProvider | null;
+  loading: boolean;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits(["update:modelValue", "disconnected"]);
 
 const isOpen = ref(props.modelValue);
-const loading = ref(false);
+const loading = ref(props.loading);
 
 watch(
   () => props.modelValue,
   (val) => (isOpen.value = val)
+);
+
+watch(
+  () => props.loading,
+  (val) => (loading.value = val)
 );
 
 const closeDialog = () => {

@@ -39,10 +39,12 @@ export interface ICreateProvider {
   accountId: string;
 }
 
-export interface IConnectInstance {
-  base64: string;
-}
 
+export interface IConnectInstance {
+  pairingCode?: string;
+  code?: string;
+  base64?: string;
+}
 export interface IProviderGeneric {
   id: number;
   providerId: string;

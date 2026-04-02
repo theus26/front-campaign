@@ -10,17 +10,6 @@ import EditProviderDialog from '../dialogs/EditProviderDialog.vue';
 import QrCodeModal from '../dialogs/QrCodeModal.vue';
 import ReconnectProviderDialog from '../dialogs/ReconnectProviderDialog.vue';
 
-
-const emit = defineEmits<{
-  (e: "next"): void
-  (e: "back"): void
-}>();
-
-
-
-const formRef = ref<VForm | null>(null);
-
-// providers composable encapsulates provider logic
 const {
   providers,
   loadProviders,
@@ -35,12 +24,14 @@ const {
   loading,
   creatingLoading,
   base64,
+  reconnectBase64,
   qrcodeModal,
   openAddDialog,
   editDialog,
   deleteProviderDialog,
   disconnectingProviderDialog,
   reconetingProviderDialog,
+  formRef,
   onSelectRow,
   updateOptions,
   resolveStatus,
@@ -51,15 +42,15 @@ const {
   openDeleteDialog,
   desconectarConexao,
   openDisconnectDialog,
+  openReconnectDialog,
   createNewProvider,
+  emit,
 } = useProvidersManager()
 
 const { validateStepThree, selectedRows } = useCreateCampaign()
 
-// Local refs for datatable binding
-//const selectedRowsLocal = ref<any[]>([])
 
-// re-expose handlers with slightly adapted signatures
+
 const onSelectRowLocal = (rows: any[]) => {
   // keep only last selected to mimic original behavior
   if (!rows || rows.length === 0) {
@@ -67,28 +58,18 @@ const onSelectRowLocal = (rows: any[]) => {
     return
   }
   selectedRows.value = [rows[rows.length - 1]]
-  console.log(selectedRows.value);
-
   onSelectRow(rows)
 }
 
-const updateOptionsLocal = (options: any) => {
-  updateOptions(options)
-}
-
-vue.watch(searchQuery, () => {
-  // could debounce and call server filter if needed
-})
 
 
-// life-cycle
+
+
 onMounted(async () => {
   await loadProviders()
-  console.log('provider');
 
 })
 
-// emit next handler (called by form submit)
 const onNext = async () => {
   validateStepThree(formRef.value)
   await loadProviders()
@@ -110,7 +91,6 @@ const onNext = async () => {
         <AppTextField v-model="nameProvider" clearable label="Nome da caixa."
           placeholder="Insira um nome para caixa de saída" type="text" :hide-spin-buttons="true"
           class="textfield-demo-icon-slot" :rules="[requiredValidator]">
-          <!-- Append -->
           <template #append>
             <VBtn @click="createProvider()" :disabled="nameProvider.length < 2" :loading="creatingLoading">
               <span class="ms-3">Criar caixa</span>
@@ -120,7 +100,6 @@ const onNext = async () => {
       </VCol>
 
 
-      <!-- When there are providers -->
       <VCol v-else cols="12">
         <VDivider />
 
@@ -139,7 +118,7 @@ const onNext = async () => {
 
         <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" v-model:page="page"
           :headers="headers" :items="providers" :items-length="totalRecords" return-object show-select
-          class="text-no-wrap" @update:model-value="onSelectRowLocal" @update:options="updateOptionsLocal">
+          class="text-no-wrap" @update:model-value="onSelectRowLocal" @update:options="updateOptions">
           <template #item.product="{ item }">
             <div class="d-flex align-center gap-x-4">
               <VAvatar v-if="item.profilePictureUrl" size="38" variant="tonal" rounded
@@ -165,7 +144,7 @@ const onNext = async () => {
               <VMenu activator="parent">
                 <VList>
                   <template v-if="item.status === 'close'">
-                    <VListItem value="reconnect" prepend-icon="tabler-refresh" @click="reconectarProvider(item)">
+                    <VListItem value="reconnect" prepend-icon="tabler-refresh" @click="openReconnectDialog(item)">
                       Reconectar
                     </VListItem>
 
@@ -219,6 +198,7 @@ const onNext = async () => {
     @delete="excluirProvider($event)" />
   <DisconnectProviderDialog v-model="disconnectingProviderDialog" :provider="selectedProvider" :loading="loading"
     @disconnected="desconectarConexao($event)" />
-  <ReconnectProviderDialog v-model="reconetingProviderDialog" />
+  <ReconnectProviderDialog v-model="reconetingProviderDialog" :base64="reconnectBase64"
+    :name="selectedProvider?.name || ''" @next="loadProviders" />
 
 </template>
