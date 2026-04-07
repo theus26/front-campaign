@@ -1,10 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-// import ConnectProviderDialog from './dialogs/ConnectProviderDialog.vue'
-// import DeleteProviderDialog from './dialogs/DeleteProviderDialog.vue'
-// import DisconnectProviderDialog from './dialogs/DisconnectProviderDialog.vue'
-// import EditProviderDialog from './dialogs/EditProviderDialog.vue'
-// import ReconnectProviderDialog from './dialogs/ReconnectProviderDialog.vue'
 import StepFourMessage from './steps/StepFourMessage.vue'
 import StepOneInfo from './steps/StepOneInfo.vue'
 import StepThreeProviders from './steps/StepThreeProviders.vue'

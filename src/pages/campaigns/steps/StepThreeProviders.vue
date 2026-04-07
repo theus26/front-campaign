@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
 import { useProvidersManager } from '@/composables/Provider/useProvidersManager';
-import * as vue from 'vue';
 import { VForm } from 'vuetify/components';
 import ConnectProviderDialog from '../dialogs/ConnectProviderDialog.vue';
 import DeleteProviderDialog from '../dialogs/DeleteProviderDialog.vue';
@@ -12,8 +11,6 @@ import ReconnectProviderDialog from '../dialogs/ReconnectProviderDialog.vue';
 
 const {
   providers,
-  loadProviders,
-  createProvider,
   nameProvider,
   selectedProvider,
   searchQuery,
@@ -31,44 +28,30 @@ const {
   deleteProviderDialog,
   disconnectingProviderDialog,
   reconetingProviderDialog,
+  selectedProviderArr,
   formRef,
   onSelectRow,
   updateOptions,
   resolveStatus,
   openDialogEdit,
   updateProvider,
-  reconectarProvider,
   excluirProvider,
   openDeleteDialog,
   desconectarConexao,
   openDisconnectDialog,
   openReconnectDialog,
   createNewProvider,
-  emit,
+  loadProviders,
+  createProvider,
+
 } = useProvidersManager()
 
-const { validateStepThree, selectedRows } = useCreateCampaign()
+const { validateStepThree } = useCreateCampaign()
 
-
-
-const onSelectRowLocal = (rows: any[]) => {
-  // keep only last selected to mimic original behavior
-  if (!rows || rows.length === 0) {
-    selectedRows.value = []
-    return
-  }
-  selectedRows.value = [rows[rows.length - 1]]
-  onSelectRow(rows)
-}
-
-
-
-
-
-onMounted(async () => {
-  await loadProviders()
-
-})
+const emit = defineEmits<{
+  (e: "next"): void;
+  (e: "back"): void;
+}>();
 
 const onNext = async () => {
   validateStepThree(formRef.value)
@@ -86,19 +69,21 @@ const onNext = async () => {
         <p class="mb-0">Escolha a caixa de saída que será utilizada para enviar mensagens</p>
       </VCol>
 
-      <!-- When there are no providers -->
-      <VCol cols="12" v-if="!providers.length && !searchQuery">
+      <VCol cols="12" v-if="loading">
+        <VSkeletonLoader type="table" style="width: 100%; height: 300px" />
+      </VCol>
+
+      <VCol cols="12" v-else-if="!providers.length && !searchQuery">
         <AppTextField v-model="nameProvider" clearable label="Nome da caixa."
           placeholder="Insira um nome para caixa de saída" type="text" :hide-spin-buttons="true"
           class="textfield-demo-icon-slot" :rules="[requiredValidator]">
           <template #append>
             <VBtn @click="createProvider()" :disabled="nameProvider.length < 2" :loading="creatingLoading">
-              <span class="ms-3">Criar caixa</span>
+              <span>Criar caixa</span>
             </VBtn>
           </template>
         </AppTextField>
       </VCol>
-
 
       <VCol v-else cols="12">
         <VDivider />
@@ -109,23 +94,31 @@ const onNext = async () => {
           </div>
 
           <VSpacer />
+
           <div class="d-flex gap-4 flex-wrap align-center">
-            <VBtn color="primary" prepend-icon="tabler-plus" @click="openAddDialog = true">Nova conexão</VBtn>
+            <VBtn color="primary" prepend-icon="tabler-plus" @click="openAddDialog = true">
+              Nova conexão
+            </VBtn>
           </div>
         </div>
 
         <VDivider class="mt-4" />
 
-        <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" v-model:page="page"
-          :headers="headers" :items="providers" :items-length="totalRecords" return-object show-select
-          class="text-no-wrap" @update:model-value="onSelectRowLocal" @update:options="updateOptions">
+        <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedProviderArr"
+          v-model:page="page" :headers="headers" :items="providers" :items-length="totalRecords" return-object
+          :single-select="true" show-select class="text-no-wrap" @update:model-value="onSelectRow"
+          @update:options="updateOptions">
           <template #item.product="{ item }">
             <div class="d-flex align-center gap-x-4">
               <VAvatar v-if="item.profilePictureUrl" size="38" variant="tonal" rounded
                 :image="item.profilePictureUrl" />
               <div class="d-flex flex-column">
-                <span class="text-body-1 font-weight-medium text-high-emphasis">{{ item.name }}</span>
-                <span class="text-body-2">{{ item.owner ?? 'Desconectado' }}</span>
+                <span class="text-body-1 font-weight-medium text-high-emphasis">
+                  {{ item.name }}
+                </span>
+                <span class="text-body-2">
+                  {{ item.owner ?? 'Desconectado' }}
+                </span>
               </div>
             </div>
           </template>
@@ -177,7 +170,9 @@ const onNext = async () => {
           </VBtn>
 
           <div class="d-flex gap-4">
-            <VBtn color="secondary" variant="tonal">Salvar rascunho</VBtn>
+            <VBtn color="secondary" variant="tonal">
+              Salvar rascunho
+            </VBtn>
 
             <VBtn type="submit">
               Próximo
@@ -199,6 +194,6 @@ const onNext = async () => {
   <DisconnectProviderDialog v-model="disconnectingProviderDialog" :provider="selectedProvider" :loading="loading"
     @disconnected="desconectarConexao($event)" />
   <ReconnectProviderDialog v-model="reconetingProviderDialog" :base64="reconnectBase64"
-    :name="selectedProvider?.name || ''" @next="loadProviders" />
+    :name="selectedProvider?.name || ''" @next="onNext" />
 
 </template>

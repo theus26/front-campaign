@@ -39,7 +39,6 @@ export interface ICreateProvider {
   accountId: string;
 }
 
-
 export interface IConnectInstance {
   pairingCode?: string;
   code?: string;
@@ -66,6 +65,7 @@ export interface IConnectionState {
 export interface Instance {
   instanceName?: string | null;
   state?: string | null;
+  providerId?: string;
 }
 
 export interface IProviderFilter {

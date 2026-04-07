@@ -4,22 +4,20 @@ import {
   IUpdateProvider,
 } from "@/@core/services/interfaces/campaign/IProviderService";
 import useProvider from "@/services/provider/useProvider";
-import axios from "axios";
+import { useCampaignStore } from "@/store/campaign";
 import { ref } from "vue";
 import { useToast } from "vue-toast-notification";
-import { useListProviderComposable } from "./useListProviderComposable";
 import { VForm } from "vuetify/components";
+import { useListProviderComposable } from "./useListProviderComposable";
 
 export function useProvidersManager() {
   const toast = useToast();
-  const emit = defineEmits<{
-  (e: "next"): void
-  (e: "back"): void
-}>();
+  const campaignStore = useCampaignStore();
 
-  const selectedProvider = ref<IProvider | null>(null);
+  const selectedProvider = ref<IProvider>();
+  const selectedProviderArr = ref<IProvider[]>([]);
+
   const formRef = ref<VForm | null>(null);
-  
   const itemsPerPage = ref(10);
   const page = ref(1);
   const searchQuery = ref("");
@@ -119,19 +117,6 @@ export function useProvidersManager() {
     }
   };
 
-  const reconectarProvider = async (item: IProvider) => {
-    try {
-      loading.value = true;
-      await axios.post(`/api/providers/${item.accountId}/reconnect`);
-      await loadProviders();
-    } catch (err) {
-      console.error("Erro ao reconectar provider:", err);
-      toast.error("Erro ao reconectar caixa de saída");
-    } finally {
-      loading.value = false;
-    }
-  };
-
   const openDisconnectDialog = (item: IProvider) => {
     selectedProvider.value = item;
     disconnectingProviderDialog.value = true;
@@ -171,29 +156,19 @@ export function useProvidersManager() {
     }
   };
 
-  /**
-   * Atualiza opções da tabela (paginação e ordenação)
-   */
   const updateOptions = (options: any) => {
     if (options.page) page.value = options.page;
     if (options.itemsPerPage) itemsPerPage.value = options.itemsPerPage;
-    loadProviders();
   };
 
-  
-
-  /**
-   * Define qual provider foi selecionado (Step 3)
-   */
   const onSelectRow = (rows: IProvider[]) => {
-    if (!rows || rows.length === 0) return;
-    const last = rows[rows.length - 1];
-    selectedProvider.value = last;
+    if (rows.length > 0) {
+      campaignStore.setDraft({
+        providerId: rows[0]?.providerId ?? null,
+      });
+    }
   };
 
-  /**
-   * Resolve o status visual (chip)
-   */
   const resolveStatus = (status: string) => {
     switch (status) {
       case "open":
@@ -205,9 +180,17 @@ export function useProvidersManager() {
     }
   };
 
+  onMounted(async () => {
+    console.log("entrou no mounted");
+    console.log(loading.value);
+
+    await loadProviders();
+  });
+
   return {
     // refs e states
     providers,
+    selectedProviderArr,
     totalRecords,
     itemsPerPage,
     page,
@@ -223,16 +206,14 @@ export function useProvidersManager() {
     disconnectingProviderDialog,
     deleteProviderDialog,
     reconetingProviderDialog,
-
-    // tabela
+    openAddDialog,
+    formRef,
     headers,
-
     // métodos
     loadProviders,
     createProvider,
     openDialogEdit,
     updateProvider,
-    reconectarProvider,
     desconectarConexao,
     openDisconnectDialog,
     openReconnectDialog,
@@ -242,8 +223,5 @@ export function useProvidersManager() {
     updateOptions,
     resolveStatus,
     createNewProvider,
-    emit,
-    openAddDialog,
-    formRef,
   };
 }

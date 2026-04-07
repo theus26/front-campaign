@@ -1,8 +1,8 @@
 <script setup lang="ts">
+//import useCampaign from "@/services/campaign/useCampaign";
 import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign'
 import { computed, ref } from 'vue'
 import MessageComponent from '../components/message.vue'
-//import { useCreateCampaignStore } from '../store/createCampaignStore' // optional: if you use the new store
 
 const { campaignStore } = useCreateCampaign()
 
@@ -16,6 +16,8 @@ const canCreate = computed(() => {
   const draft = store.getDraft ?? store.campaignDraft ?? null
   // Support different shapes: try common access
   const messages = (draft && (draft.messages ?? draft?.messages)) ?? []
+  console.log('messages', messages);
+
   return Array.isArray(messages) && messages.length > 0
 })
 
@@ -25,7 +27,18 @@ const onCreate = async () => {
   const draft = store.getDraft ?? store.campaignDraft ?? null
   console.log('Creating campaign with draft:', draft)
   // TODO: call API and show toast/snackbar on success/failure
+
+  console.log(draft);
+
+
+
 }
+
+
+onMounted(() => {
+  console.log('store', store.getDraft);
+
+})
 </script>
 
 <template>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import useProvider from "@/services/provider/useProvider";
+import { CampaignDraft, useCampaignStore } from "@/store/campaign";
 import { onUnmounted, ref, watch } from "vue";
 import { useToast } from "vue-toast-notification";
+
 
 const props = defineProps<{
   modelValue: boolean
@@ -10,6 +12,7 @@ const props = defineProps<{
 }>()
 
 const $toast = useToast();
+const campaignStore = useCampaignStore();
 const emit = defineEmits(["update:modelValue", "next"]);
 
 const isOpen = ref(props.modelValue);
@@ -29,22 +32,21 @@ const startTimer = async () => {
   clearTimeout(connectingTimeout)
 
   const state = await useProvider.getConnectionState(props.name)
-  console.log('state', state);
-
   const status = state?.instance?.state
+  const providerId = state?.instance?.providerId
 
-  // já conectado
   if (status === "open") {
     connectionStatus.value = "connected"
-
     $toast.success("Dispositivo conectado com sucesso")
-
+    campaignStore.setDraft({
+      ...(campaignStore as unknown as CampaignDraft),
+      providerId: providerId ?? null
+    } as CampaignDraft)
     emit("next")
 
     return
   }
 
-  // já está conectando (qr já escaneado)
   if (status === "connecting") {
     connectionStatus.value = "connecting"
 
@@ -62,7 +64,6 @@ const startTimer = async () => {
     return
   }
 
-  // fluxo normal aguardando leitura
   connectionStatus.value = "waiting"
 
   interval = setInterval(checkConnection, 3000)
@@ -86,7 +87,6 @@ const checkConnection = async () => {
 
   const status = state.instance.state
 
-  // usuário escaneou
   if (status === "connecting") {
 
     if (connectionStatus.value !== "connecting") {
@@ -108,13 +108,18 @@ const checkConnection = async () => {
     return
   }
 
-  // conectado
   if (status === "open") {
+    const providerId = state.instance.providerId
     connectionStatus.value = "connected"
 
     clearInterval(interval)
     clearTimeout(qrTimeout)
     clearTimeout(connectingTimeout)
+
+    campaignStore.setDraft({
+      ...(campaignStore as unknown as CampaignDraft),
+      providerId: providerId ?? null
+    } as CampaignDraft)
 
     $toast.success("Dispositivo conectado com sucesso")
     emit("update:modelValue", false)

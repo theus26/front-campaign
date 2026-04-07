@@ -40,13 +40,13 @@ const onNext = async () => {
 
       <VCol cols="12" md="6">
         <VLabel class="mb-1 text-body-2" text="Início da campanha *" />
-        <AppDateTimePicker v-model="stepOneForm.dataStart" :config="{ enableTime: true, dateFormat: 'Y-m-d H:i' }" />
+        <AppDateTimePicker v-model="stepOneForm.dataStart" prepend-inner-icon="tabler-calendar" />
       </VCol>
 
 
       <VCol cols="12" md="6" v-if="stepOneForm.typeCampaign === 'recorrente'">
         <VLabel class="mb-1 text-body-2" text="Fim da campanha *" />
-        <AppDateTimePicker v-model="stepOneForm.dataEnd" :config="{ enableTime: true, dateFormat: 'Y-m-d H:i' }" />
+        <AppDateTimePicker v-model="stepOneForm.dataEnd" prepend-inner-icon="tabler-calendar" />
       </VCol>
 
 
