@@ -1,7 +1,7 @@
 import { ICampaignConfig } from "../interfaces/campaign/ICampaignService";
 
 const defaultConfig: ICampaignConfig = {
-  createCampaign: "/campaign/createCampaign",
+  createCampaign: "campaign/createCampaingn",
   updateCampaign: "/campaign/updateCampaign",
   deleteCampaign: "/campaign/deleteCampaign",
   getCampaign: "/campaign/getCampaign",

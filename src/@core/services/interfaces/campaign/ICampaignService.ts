@@ -1,5 +1,3 @@
-import { MessageData } from "./ICampaign";
-
 export interface ICampaignService {
   serviceCampaignConfig: ICampaignConfig;
 
@@ -14,20 +12,29 @@ export type ICampaignConfig = {
   getListCampaigns: string;
 };
 
-export type Status = "Active" | "Inactive" | "Draft"; // exemplo
-
 export interface ICreateCampaign {
   name: string;
-  intervalRepeat?: string; // TimeSpan -> string (ex: "00:05:00")
+  intervalRepeat?: number | null;
   content?: MessageData[];
   numbers: string[];
-  recurrence?: string;
-  startTime?: string;
-  timeEnd?: string;
-  status: Status;
-  intervalMessage?: string; // TimeSpan -> string
-  startCampaign?: string; // DateTimeOffset -> ISO string
-  endCampaign?: string; // DateTimeOffset -> ISO string
-  accountId?: string; // Guid -> string
-  providerId?: string; // Guid -> string
+  recurrence?: string | null;
+  startTime?: string | null;
+  timeEnd?: string | null;
+  status: string;
+  intervalMessage?: string;
+  startCampaign?: string | null;
+  endCampaign?: string | null;
+  accountId?: string;
+  providerId?: string;
+}
+
+export interface MessageData {
+  type: string;
+  message?: string;
+  mediatype?: string;
+  mimetype?: string;
+  caption?: string;
+  filename?: string;
+  media?: string;
+  dataUrl?: string;
 }

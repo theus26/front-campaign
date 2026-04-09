@@ -65,14 +65,15 @@ const onNext = async () => {
       <VCol cols="12" md="6">
         <VLabel class="mb-1 text-body-2" text="Horário de envio *" />
         <AppDateTimePicker v-model="stepOneForm.startTime"
-          :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }" />
+          :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }" prepend-inner-icon="tabler-clock" />
       </VCol>
 
 
       <VCol cols="12" md="6">
-        <VLabel class="mb-1 text-body-2" />
+        <VLabel class="mb-1 text-body-2" text="Horário de término *" />
         <AppDateTimePicker v-model="stepOneForm.endTime"
-          :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }" />
+          :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }" prepend-inner-icon="tabler-clock" />
+
       </VCol>
 
 

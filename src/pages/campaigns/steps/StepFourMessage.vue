@@ -1,37 +1,62 @@
 <script setup lang="ts">
-//import useCampaign from "@/services/campaign/useCampaign";
-import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign'
-import { computed, ref } from 'vue'
-import MessageComponent from '../components/message.vue'
+import { ICreateCampaign } from "@/@core/services/interfaces/campaign/ICampaignService";
+import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
+import useCampaignService from '@/services/campaign/useCampaign';
+import { CampaignDraft } from "@/store/campaign";
+import { computed, ref } from 'vue';
+import { useToast } from "vue-toast-notification";
+import MessageComponent from '../components/message.vue';
 
 const { campaignStore } = useCreateCampaign()
-
-// If you use the Pinia store created earlier:
-const store = campaignStore // alias
-
+const toast = useToast();
+const store = campaignStore
 const formRef = ref()
+const loading = ref(false)
 
-// canCreate: at least one message present in draft
 const canCreate = computed(() => {
   const draft = store.getDraft ?? store.campaignDraft ?? null
-  // Support different shapes: try common access
   const messages = (draft && (draft.messages ?? draft?.messages)) ?? []
-  console.log('messages', messages);
-
   return Array.isArray(messages) && messages.length > 0
 })
 
+const buildPayload = (payload: CampaignDraft): ICreateCampaign => {
+
+  return {
+    name: payload.name ?? '',
+    content: payload.messages ?? [],
+    numbers: payload.numbers ?? [],
+    intervalRepeat: payload.intervalRepeat ?? undefined,
+    recurrence: payload.recurrence?.toLowerCase() == "unica" ? "Unique" : "Recurrent",
+    startTime: payload.startTime,
+    timeEnd: payload.timeEnd,
+    status: 'InProgress',
+    intervalMessage: payload.intervalMessage ?? undefined,
+    startCampaign: payload.startCampaign,
+    endCampaign: payload.endCampaign,
+    accountId: payload.accountId ?? undefined,
+    providerId: payload.providerId ?? undefined,
+  }
+}
+
+
 const onCreate = async () => {
-  // Here you should call your API to create the campaign OR trigger store action.
-  // Example placeholder:
+  loading.value = true
+
   const draft = store.getDraft ?? store.campaignDraft ?? null
   console.log('Creating campaign with draft:', draft)
   // TODO: call API and show toast/snackbar on success/failure
-
-  console.log(draft);
-
-
-
+  try {
+    const payload = buildPayload(draft)
+    console.log('Constructed payload for campaign creation:', payload)
+    await useCampaignService.createCampaign(payload)
+    toast.success('Campanha criada com sucesso!')
+  }
+  catch (error) {
+    console.error('Error creating campaign:', error)
+    toast.error('Erro ao criar campanha. Por favor, tente novamente.')
+  } finally {
+    loading.value = false
+  }
 }
 
 
@@ -68,7 +93,7 @@ onMounted(() => {
           <div class="d-flex gap-4">
             <VBtn color="secondary" variant="tonal">Salvar rascunho</VBtn>
 
-            <VBtn type="submit" :disabled="!canCreate">
+            <VBtn type="submit" :disabled="!canCreate" :loading="loading">
               Criar campanha
               <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
             </VBtn>
