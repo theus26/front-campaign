@@ -55,7 +55,6 @@ const emit = defineEmits<{
 
 const onNext = async () => {
   validateStepThree(formRef.value)
-  await loadProviders()
   emit('next')
 }
 
