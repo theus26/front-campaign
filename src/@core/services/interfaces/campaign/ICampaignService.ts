@@ -1,7 +1,10 @@
+import { IPaginacao } from "../types";
+
 export interface ICampaignService {
   serviceCampaignConfig: ICampaignConfig;
 
   createCampaign(data: ICreateCampaign): Promise<void>;
+  listCampaigns(filter: ICampaignFilter): Promise<IPaginacao<ICampaign>>;
 }
 
 export type ICampaignConfig = {
@@ -37,4 +40,40 @@ export interface MessageData {
   filename?: string;
   media?: string;
   dataUrl?: string;
+}
+
+type Status = "InProgress" | "Closed" | "Scheduled" | "Draft" | "Paused";
+type Recurrence = "Recurrent" | "Unique";
+
+export interface ICampaignFilter {
+  campaignId?: string;
+  name?: string;
+  intervalRepeat?: string;
+  content?: string;
+  recurrence?: string;
+  startTime?: string;
+  timeEnd?: string;
+  status?: string;
+  intervalMessage?: string;
+  startCampaign?: string;
+  endCampaign?: string;
+  accountId?: string;
+  providerId?: string;
+  pagina: number;
+  tamanhoPagina: number;
+}
+
+export interface ICampaign {
+  campaignId: string;
+  name?: string;
+  intervalRepeat?: string | null;
+  recurrence?: Recurrence;
+  startTime?: string;
+  timeEnd?: string;
+  status?: Status;
+  intervalMessage?: string;
+  startCampaign?: string;
+  endCampaign?: string;
+  accountId?: string;
+  providerId?: string;
 }

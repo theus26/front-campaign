@@ -2,10 +2,13 @@ import { AxiosInstance } from "axios";
 import AuthService from "../auth/authService";
 import { IAuthService } from "../interfaces/auth/IAuthService";
 import {
+  ICampaign,
   ICampaignConfig,
+  ICampaignFilter,
   ICampaignService,
   ICreateCampaign,
 } from "../interfaces/campaign/ICampaignService";
+import { IPaginacao } from "../interfaces/types";
 import defaultConfig from "./campaignDefaultConfig";
 
 export default class CampaignService
@@ -27,6 +30,16 @@ export default class CampaignService
     this.axiosIns = axiosIns;
     this.useAuth.configureInterceptorsAxiosInstance(this.axiosIns);
   }
+  async listCampaigns(filter: ICampaignFilter): Promise<IPaginacao<ICampaign>> {
+    const response = await this.axiosIns.get(
+      this.serviceCampaignConfig.getListCampaigns,
+      {
+        params: filter,
+      },
+    );
+    return response.data;
+  }
+
   async createCampaign(data: ICreateCampaign): Promise<void> {
     const response = await this.axiosIns.post(
       this.serviceCampaignConfig.createCampaign,

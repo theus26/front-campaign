@@ -5,7 +5,7 @@ const defaultConfig: ICampaignConfig = {
   updateCampaign: "/campaign/updateCampaign",
   deleteCampaign: "/campaign/deleteCampaign",
   getCampaign: "/campaign/getCampaign",
-  getListCampaigns: "/campaign/getListCampaigns",
+  getListCampaigns: "/campaign/ListCampaigns",
 };
 
 export default defaultConfig;
