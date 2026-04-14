@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ICreateCampaign } from "@/@core/services/interfaces/campaign/ICampaignService";
 import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
+import { router } from "@/plugins/1.router";
 import useCampaignService from '@/services/campaign/useCampaign';
 import { CampaignDraft } from "@/store/campaign";
 import { computed, ref } from 'vue';
@@ -50,6 +51,7 @@ const onCreate = async () => {
     console.log('Constructed payload for campaign creation:', payload)
     await useCampaignService.createCampaign(payload)
     toast.success('Campanha criada com sucesso!')
+    router.push({ name: 'campaigns-list' })
   }
   catch (error) {
     console.error('Error creating campaign:', error)
