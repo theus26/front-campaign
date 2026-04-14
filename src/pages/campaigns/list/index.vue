@@ -7,12 +7,13 @@ const {
   page,
   selectedStatus,
   selectedRecurrence,
-  campaignsComputed,
-  totalCampaigns,
+  campaigns,
   headers,
   statusCampaign,
   recurrences,
   widgetData,
+  loading,
+  totalRecords,
   resolveStatus,
   resolveRecurrence,
   formatDate,
@@ -92,13 +93,13 @@ const {
 
       <VDivider class="mt-4" />
 
-      <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:page="page" :headers="headers"
-        :items="campaignsComputed" :items-length="totalCampaigns" class="text-no-wrap" @update:options="updateOptions">
+      <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:page="page" :headers="headers" :items="campaigns"
+        :items-length="totalRecords" :loading="loading" class="text-no-wrap" @update:options="updateOptions">
         <template #item.name="{ item }">
           <div class="d-flex align-center gap-x-4">
-            <VAvatar size="38" rounded :style="{ backgroundColor: stringToColor(item.name) }">
+            <VAvatar size="38" rounded :style="{ backgroundColor: stringToColor(item.name || '') }">
               <span class="text-white text-sm font-weight-medium">
-                {{ getInitials(item.name) }}
+                {{ getInitials(item.name || '') }}
               </span>
             </VAvatar>
             <div class="d-flex flex-column">
@@ -111,8 +112,8 @@ const {
 
 
         <template #item.recurrence="{ item }">
-          <VChip :color="resolveRecurrence(item.recurrence).color" size="small" label>
-            {{ resolveRecurrence(item.recurrence).label }}
+          <VChip :color="resolveRecurrence(item.recurrence || '').color" size="small" label>
+            {{ resolveRecurrence(item.recurrence || '').label }}
           </VChip>
         </template>
 
@@ -122,18 +123,20 @@ const {
 
 
         <template #item.startDate="{ item }">
-          <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ formatDate(item.startDate)
-          }}</span>
+          <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ formatDate(item.startCampaign
+            || null)
+            }}</span>
         </template>
 
         <template #item.endDate="{ item }">
-          <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ formatDate(item.endDate)
-          }}</span>
+          <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ formatDate(item.endCampaign ||
+            null)
+            }}</span>
         </template>
 
         <template #item.status="{ item }">
-          <VChip :color="resolveStatus(item.status).color" size="small" label>
-            {{ resolveStatus(item.status).label }}
+          <VChip :color="resolveStatus(item.status || '').color" size="small" label>
+            {{ resolveStatus(item.status || '').label }}
           </VChip>
         </template>
 
@@ -143,7 +146,7 @@ const {
 
             <VMenu activator="parent">
               <VList>
-                <VListItem v-for="action in getCampaignActions(item.status)" :key="action.key"
+                <VListItem v-for="action in getCampaignActions(item.status || '')" :key="action.key"
                   @click="handleAction(action.key, item)">
                   <template #prepend>
                     <VIcon :icon="action.icon" :color="action.color" />
@@ -159,7 +162,7 @@ const {
         </template>
 
         <template #bottom>
-          <TablePagination v-model:page="page" :items-per-page="itemsPerPage" :total-items="totalCampaigns" />
+          <TablePagination v-model:page="page" :items-per-page="itemsPerPage" :total-items="totalRecords" />
         </template>
       </VDataTableServer>
     </VCard>

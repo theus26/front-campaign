@@ -1,4 +1,7 @@
-import { computed, ref } from "vue";
+import { IReportsCampaigns } from "@/@core/services/interfaces/campaign/ICampaignService";
+import useCampaign from "@/services/campaign/useCampaign";
+import { ref } from "vue";
+import { useListCampaign } from "./useListCampaign";
 
 export function useCampaignList() {
   const searchQuery = ref("");
@@ -9,6 +12,7 @@ export function useCampaignList() {
 
   const selectedStatus = ref();
   const selectedRecurrence = ref();
+  const reports = ref<IReportsCampaigns | null>(null);
 
   const statusCampaign = [
     { title: "Em Andamento", value: "InProgress" },
@@ -17,13 +21,6 @@ export function useCampaignList() {
     { title: "Rascunho", value: "Draft" },
     { title: "Pausada", value: "Paused" },
   ];
-
-  const widgetData = ref([
-    { title: "Campanhas Pendentes", value: 56, icon: "tabler-calendar-stats" },
-    { title: "Campanhas Concluídas", value: 12689, icon: "tabler-checks" },
-    { title: "Campanhas Pausadas", value: 124, icon: "tabler-pause" },
-    { title: "Campanhas Falhadas", value: 32, icon: "tabler-alert-octagon" },
-  ]);
 
   const recurrences = [
     { title: "Recorrente", value: "Recurrent" },
@@ -70,33 +67,6 @@ export function useCampaignList() {
     },
   ];
 
-  const campaigns = ref([
-    {
-      name: "Campanha de Promoção Abril",
-      status: "InProgress",
-      recurrence: "Recurrent",
-      providerName: "Twilio",
-      startDate: "2026-04-10T09:00:00",
-      endDate: "2026-04-10T18:00:00",
-    },
-    {
-      name: "Black Friday VIP",
-      status: "Scheduled",
-      recurrence: "Unique",
-      providerName: "Zenvia",
-      startDate: "2026-11-25T08:00:00",
-      endDate: "2026-11-25T23:00:00",
-    },
-    {
-      name: "Campanha Boas-vindas",
-      status: "Draft",
-      recurrence: "Recurrent",
-      providerName: "Twilio",
-      startDate: null,
-      endDate: null,
-    },
-  ]);
-
   const statusMap = {
     InProgress: "Em andamento",
     Closed: "Encerrada",
@@ -122,18 +92,18 @@ export function useCampaignList() {
     return (key: string) => map[key] ?? { label: key, color: "default" };
   };
 
-  // const {
-  //   data: campaigns,
-  //   totalRecords,
-  //   loading,
-  //   fetch: loadCampaigns,
-  // } = useListCampaign({
-  //   search: searchQuery,
-  //   page,
-  //   itemsPerPage,
-  //   recurring: selectedRecurrence,
-  //   status: selectedStatus,
-  // });
+  const {
+    data: campaigns,
+    totalRecords,
+    loading,
+    fetch: loadCampaigns,
+  } = useListCampaign({
+    search: searchQuery,
+    page,
+    itemsPerPage,
+    recurring: selectedRecurrence,
+    status: selectedStatus,
+  });
 
   const resolveStatus = createResolver(campaignStatusMap);
   const resolveRecurrence = createResolver(campaignTypeMap);
@@ -169,10 +139,6 @@ export function useCampaignList() {
 
     return [campaign.providerName, status, date].filter(Boolean).join(" • ");
   };
-
-  const totalCampaigns = computed(() => campaigns.value.length);
-
-  const campaignsComputed = computed(() => campaigns.value);
 
   const updateOptions = (options: any) => {
     sortBy.value = options.sortBy[0]?.key;
@@ -227,7 +193,6 @@ export function useCampaignList() {
   const handleAction = (actionKey: string, item: any) => {
     switch (actionKey) {
       case "pause":
-        console.log("Pausar", item);
         break;
 
       case "finish":
@@ -244,6 +209,42 @@ export function useCampaignList() {
     }
   };
 
+  const widgetData = computed(() => {
+    if (!reports.value) return [];
+
+    return [
+      {
+        title: "Campanhas Pendentes",
+        value: reports.value.agendada,
+        icon: "tabler-calendar-stats",
+      },
+      {
+        title: "Campanhas Concluídas",
+        value: reports.value.finalizada,
+        icon: "tabler-checks",
+      },
+      {
+        title: "Campanhas Pausadas",
+        value: reports.value.pausada,
+        icon: "tabler-pause",
+      },
+      {
+        title: "Campanhas em Andamento",
+        value: reports.value.emAndamento,
+        icon: "tabler-activity",
+      },
+      {
+        title: "Rascunhos",
+        value: reports.value.rascunho,
+        icon: "tabler-edit",
+      },
+    ];
+  });
+
+  onMounted(async () => {
+    reports.value = await useCampaign.reportsCampaign();
+  });
+
   return {
     searchQuery,
     itemsPerPage,
@@ -251,13 +252,13 @@ export function useCampaignList() {
     selectedStatus,
     selectedRecurrence,
 
-    campaignsComputed,
-    totalCampaigns,
+    campaigns,
     headers,
     statusCampaign,
     recurrences,
     widgetData,
-
+    totalRecords,
+    loading,
     resolveStatus,
     resolveRecurrence,
     formatDate,

@@ -5,6 +5,7 @@ export interface ICampaignService {
 
   createCampaign(data: ICreateCampaign): Promise<void>;
   listCampaigns(filter: ICampaignFilter): Promise<IPaginacao<ICampaign>>;
+  reportsCampaign(): Promise<IReportsCampaigns>;
 }
 
 export type ICampaignConfig = {
@@ -13,6 +14,7 @@ export type ICampaignConfig = {
   deleteCampaign: string;
   getCampaign: string;
   getListCampaigns: string;
+  reportsCampaigns: string;
 };
 
 export interface ICreateCampaign {
@@ -29,6 +31,14 @@ export interface ICreateCampaign {
   endCampaign?: string | null;
   accountId?: string;
   providerId?: string;
+}
+
+export interface IReportsCampaigns {
+  emAndamento: number;
+  finalizada: number;
+  agendada: number;
+  rascunho: number;
+  pausada: number;
 }
 
 export interface MessageData {
@@ -69,6 +79,7 @@ export interface ICampaign {
   intervalRepeat?: string | null;
   recurrence?: Recurrence;
   startTime?: string;
+  providerName?: string;
   timeEnd?: string;
   status?: Status;
   intervalMessage?: string;

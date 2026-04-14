@@ -7,6 +7,7 @@ import {
   ICampaignFilter,
   ICampaignService,
   ICreateCampaign,
+  IReportsCampaigns,
 } from "../interfaces/campaign/ICampaignService";
 import { IPaginacao } from "../interfaces/types";
 import defaultConfig from "./campaignDefaultConfig";
@@ -29,6 +30,12 @@ export default class CampaignService
     this.useAuth = useAuth;
     this.axiosIns = axiosIns;
     this.useAuth.configureInterceptorsAxiosInstance(this.axiosIns);
+  }
+  async reportsCampaign(): Promise<IReportsCampaigns> {
+    const response = await this.axiosIns.get(
+      this.serviceCampaignConfig.reportsCampaigns,
+    );
+    return response.data;
   }
   async listCampaigns(filter: ICampaignFilter): Promise<IPaginacao<ICampaign>> {
     const response = await this.axiosIns.get(
