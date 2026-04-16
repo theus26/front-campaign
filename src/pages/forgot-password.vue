@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
-
+import logoDisparaFacil from '@images/campaigns/dispara-facil-animation.png'
 import authV2ForgotPasswordIllustrationDark from '@images/pages/auth-v2-forgot-password-illustration-dark.png'
 import authV2ForgotPasswordIllustrationLight from '@images/pages/auth-v2-forgot-password-illustration-light.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
+import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+import { themeConfig } from '@themeConfig'
 
 const email = ref('')
 
@@ -27,96 +27,53 @@ definePage({
     <div class="auth-logo d-flex align-center gap-x-3">
       <VNodeRenderer :nodes="themeConfig.app.logo" />
       <h1 class="auth-title">
-        {{ themeConfig.app.title }}
+        {{ themeConfig.app.subTitle }}
       </h1>
     </div>
   </RouterLink>
 
-  <VRow
-    class="auth-wrapper bg-surface"
-    no-gutters
-  >
-    <VCol
-      md="8"
-      class="d-none d-md-flex"
-    >
+  <VRow class="auth-wrapper bg-surface" no-gutters>
+    <VCol md="8" class="d-none d-md-flex">
       <div class="position-relative bg-background w-100 me-0">
-        <div
-          class="d-flex align-center justify-center w-100 h-100"
-          style="padding-inline: 150px;"
-        >
-          <VImg
-            max-width="468"
-            :src="authThemeImg"
-            class="auth-illustration mt-16 mb-2"
-          />
+        <div class="d-flex align-center justify-center w-100 h-100" style="padding-inline: 150px;">
+          <VImg max-width="468" :src="logoDisparaFacil" class="auth-illustration mt-16 mb-2" />
         </div>
 
-        <img
-          class="auth-footer-mask"
-          :src="authThemeMask"
-          alt="auth-footer-mask"
-          height="280"
-          width="100"
-        >
+        <img class="auth-footer-mask" :src="authThemeMask" alt="auth-footer-mask" height="280" width="100">
       </div>
     </VCol>
 
-    <VCol
-      cols="12"
-      md="4"
-      class="d-flex align-center justify-center"
-    >
-      <VCard
-        flat
-        :max-width="500"
-        class="mt-12 mt-sm-0 pa-4"
-      >
+    <VCol cols="12" md="4" class="d-flex align-center justify-center">
+      <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-4">
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Forgot Password? 🔒
+            Esqueceu sua senha? 🔒
           </h4>
           <p class="mb-0">
-            Enter your email and we'll send you instructions to reset your password
+            Digite seu email e enviaremos instruções para redefinir sua senha
           </p>
         </VCardText>
 
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm @submit.prevent="() => { }">
             <VRow>
               <!-- email -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="email"
-                  autofocus
-                  label="Email"
-                  type="email"
-                  placeholder="johndoe@email.com"
-                />
+                <AppTextField v-model="email" autofocus label="Email" type="email" placeholder="johndoe@email.com" />
               </VCol>
 
               <!-- Reset link -->
               <VCol cols="12">
-                <VBtn
-                  block
-                  type="submit"
-                >
-                  Send Reset Link
+                <VBtn block type="submit">
+                  Enviar link de redefinição
                 </VBtn>
               </VCol>
 
               <!-- back to login -->
               <VCol cols="12">
-                <RouterLink
-                  class="d-flex align-center justify-center"
-                  :to="{ name: 'login' }"
-                >
-                  <VIcon
-                    icon="tabler-chevron-left"
-                    size="20"
-                    class="me-1 flip-in-rtl"
-                  />
-                  <span>Back to login</span>
+                <RouterLink class="d-flex align-center justify-center" :to="{ name: 'login' }">
+                  <VIcon icon="tabler-chevron-left" size="20" class="me-1 flip-in-rtl" />
+                  <span>Voltar ao login</span>
                 </RouterLink>
               </VCol>
             </VRow>

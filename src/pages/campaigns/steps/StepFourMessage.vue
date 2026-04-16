@@ -11,14 +11,9 @@ import MessageComponent from '../components/message.vue';
 const { campaignStore } = useCreateCampaign()
 const toast = useToast();
 const store = campaignStore
-const formRef = ref()
 const loading = ref(false)
 
-const canCreate = computed(() => {
-  const draft = store.getDraft ?? store.campaignDraft ?? null
-  const messages = (draft && (draft.messages ?? draft?.messages)) ?? []
-  return Array.isArray(messages) && messages.length > 0
-})
+const canCreate = computed(() => validation.value.valid)
 
 const buildPayload = (payload: CampaignDraft): ICreateCampaign => {
 
@@ -38,6 +33,52 @@ const buildPayload = (payload: CampaignDraft): ICreateCampaign => {
     providerId: payload.providerId ?? undefined,
   }
 }
+
+const validation = computed(() => {
+  const draft = store.getDraft ?? store.campaignDraft ?? null
+  if (!draft) return { valid: false, errors: ['Draft não encontrado'] }
+
+  const errors: string[] = []
+
+  // Nome
+  if (!draft.name || !draft.name.trim()) {
+    errors.push('Informe o nome da campanha')
+  }
+
+  // Números
+  if (!Array.isArray(draft.numbers) || draft.numbers.length === 0) {
+    errors.push('Adicione pelo menos um número')
+  }
+
+  // Mensagens
+  if (!Array.isArray(draft.messages) || draft.messages.length === 0) {
+    errors.push('Adicione pelo menos uma mensagem')
+  }
+
+  // Horários
+  if (!draft.startTime) {
+    errors.push('Informe o horário de início')
+  }
+
+  if (!draft.timeEnd) {
+    errors.push('Informe o horário de término')
+  }
+
+  // Provider / Account
+  if (!draft.providerId) {
+    errors.push('Selecione uma caixa de saida')
+  }
+
+  // Recorrência
+  if (draft.recurrence !== 'unica' && !draft.intervalRepeat) {
+    errors.push('Informe o intervalo de repetição')
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  }
+})
 
 
 const onCreate = async () => {
@@ -93,12 +134,23 @@ onMounted(() => {
           </VBtn>
 
           <div class="d-flex gap-4">
-            <VBtn color="secondary" variant="tonal">Salvar rascunho</VBtn>
+            <VBtn color="primary" variant="tonal">Salvar rascunho</VBtn>
 
-            <VBtn type="submit" :disabled="!canCreate" :loading="loading">
-              Criar campanha
-              <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
-            </VBtn>
+            <VTooltip :disabled="canCreate">
+              <template #activator="{ props }">
+                <div v-bind="props">
+                  <VBtn type="submit" :disabled="!canCreate" :loading="loading">
+                    Criar campanha
+                  </VBtn>
+                </div>
+              </template>
+
+              <div v-if="validation.errors.length">
+                <div v-for="(err, i) in validation.errors" :key="i">
+                  • {{ err }}
+                </div>
+              </div>
+            </VTooltip>
           </div>
         </div>
       </VCol>

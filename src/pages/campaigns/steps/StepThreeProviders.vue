@@ -161,7 +161,7 @@ const onNext = async () => {
         </VDataTableServer>
       </VCol>
 
-      <VCol cols="12">
+      <VCol cols="12" v-if="!loading">
         <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
           <VBtn color="secondary" variant="tonal" @click="$emit('back')">
             <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />

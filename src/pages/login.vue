@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
+import logoDisparaFacil from '@images/campaigns/dispara-facil-animation.png'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
 import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
 import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
@@ -68,7 +69,7 @@ const login = async () => {
     // Redirect to `to` query if exist or redirect to index route
     // ❗ nextTick is required to wait for DOM updates and later redirect
     await nextTick(() => {
-      router.replace(route.query.to ? String(route.query.to) : '/')
+      router.replace(route.query.to ? String(route.query.to) : '/campaigns/home')
     })
   }
   catch (err) {
@@ -99,7 +100,7 @@ const onSubmit = () => {
     <VCol md="8" class="d-none d-md-flex">
       <div class="position-relative bg-background w-100 me-0">
         <div class="d-flex align-center justify-center w-100 h-100" style="padding-inline: 6.25rem;">
-          <VImg max-width="613" :src="authThemeImg" class="auth-illustration mt-16 mb-2" />
+          <VImg max-width="613" :src="logoDisparaFacil" class="auth-illustration mt-16 mb-2" />
         </div>
 
         <img class="auth-footer-mask" :src="authThemeMask" alt="auth-footer-mask" height="280" width="100">
@@ -110,32 +111,21 @@ const onSubmit = () => {
       <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-4">
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Bem-vindo(a) ao ! <span class="text-capitalize"> {{ themeConfig.app.subTitle }} </span>! 👋🏻
+            Bem-vindo(a) ao <span class="text-capitalize"> {{ themeConfig.app.subTitle }} </span>! 👋🏻
           </h4>
           <p class="mb-0">
             Faça login na sua conta e comece a aventura
           </p>
         </VCardText>
-        <!-- <VCardText>
-          <VAlert color="primary" variant="tonal">
-            <p class="text-sm mb-2">
-              Admin Email: <strong>admin@demo.com</strong> / Pass: <strong>admin</strong>
-            </p>
-            <p class="text-sm mb-0">
-              Client Email: <strong>client@demo.com</strong> / Pass: <strong>client</strong>
-            </p>
-          </VAlert>
-        </VCardText> -->
+
         <VCardText>
           <VForm ref="refVForm" @submit.prevent="onSubmit">
             <VRow>
-              <!-- email -->
               <VCol cols="12">
                 <AppTextField v-model="credentials.email" label="Email" placeholder="johndoe@email.com" type="email"
                   autofocus :rules="[requiredValidator, emailValidator]" :error-messages="errors.email" />
               </VCol>
 
-              <!-- password -->
               <VCol cols="12">
                 <AppTextField v-model="credentials.password" label="Password" placeholder="············"
                   :rules="[requiredValidator]" :type="isPasswordVisible ? 'text' : 'password'"
@@ -155,7 +145,6 @@ const onSubmit = () => {
                 </VBtn>
               </VCol>
 
-              <!-- create account -->
               <VCol cols="12" class="text-center">
                 <span>É novo(a) na nossa plataforma?</span>
                 <RouterLink class="text-primary ms-1" :to="{ name: 'register' }">
@@ -168,7 +157,6 @@ const onSubmit = () => {
                 <VDivider />
               </VCol>
 
-              <!-- auth providers -->
               <VCol cols="12" class="text-center">
                 <AuthProvider />
               </VCol>

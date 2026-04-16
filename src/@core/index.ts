@@ -1,13 +1,16 @@
-import type { UserThemeConfig } from './types'
-import type { LayoutConfig } from '@layouts/types'
+import type { LayoutConfig } from "@layouts/types";
+import type { UserThemeConfig } from "./types";
 
-export const defineThemeConfig = (userConfig: UserThemeConfig): { themeConfig: UserThemeConfig; layoutConfig: LayoutConfig } => {
+export const defineThemeConfig = (
+  userConfig: UserThemeConfig,
+): { themeConfig: UserThemeConfig; layoutConfig: LayoutConfig } => {
   return {
     themeConfig: userConfig,
     layoutConfig: {
       app: {
         title: userConfig.app.title,
         logo: userConfig.app.logo,
+        subTitle: userConfig.app.subTitle,
         contentWidth: userConfig.app.contentWidth,
         contentLayoutNav: userConfig.app.contentLayoutNav,
         overlayNavFromBreakpoint: userConfig.app.overlayNavFromBreakpoint,
@@ -39,5 +42,5 @@ export const defineThemeConfig = (userConfig: UserThemeConfig): { themeConfig: U
         sectionTitlePlaceholder: userConfig.icons.sectionTitlePlaceholder,
       },
     },
-  }
-}
+  };
+};

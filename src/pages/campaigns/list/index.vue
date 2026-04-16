@@ -29,7 +29,6 @@ const {
 <template>
   <div>
     <VCard class="mb-6">
-      <!-- 👉 Widgets  -->
       <VCardText>
         <VRow>
           <template v-for="(data, id) in widgetData" :key="id">
@@ -125,13 +124,13 @@ const {
         <template #item.startDate="{ item }">
           <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ formatDate(item.startCampaign
             || null)
-            }}</span>
+          }}</span>
         </template>
 
         <template #item.endDate="{ item }">
           <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ formatDate(item.endCampaign ||
             null)
-            }}</span>
+          }}</span>
         </template>
 
         <template #item.status="{ item }">
