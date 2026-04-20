@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { VForm } from 'vuetify/components/VForm'
-
+import { ICreateUser } from '@/@core/services/interfaces/user/IUserService'
+import { router } from '@/plugins/1.router'
+import useUser from '@/services/user/useUser'
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
-
+import logoDisparaFacil from '@images/campaigns/dispara-facil-animation.png'
 import authV2RegisterIllustrationBorderedDark from '@images/pages/auth-v2-register-illustration-bordered-dark.png'
 import authV2RegisterIllustrationBorderedLight from '@images/pages/auth-v2-register-illustration-bordered-light.png'
 import authV2RegisterIllustrationDark from '@images/pages/auth-v2-register-illustration-dark.png'
 import authV2RegisterIllustrationLight from '@images/pages/auth-v2-register-illustration-light.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
-
+import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+import { themeConfig } from '@themeConfig'
+import { useToast } from 'vue-toast-notification'
+import { VForm } from 'vuetify/components/VForm'
+const toast = useToast();
 const imageVariant = useGenerateImageVariant(authV2RegisterIllustrationLight,
   authV2RegisterIllustrationDark,
   authV2RegisterIllustrationBorderedLight,
@@ -33,6 +36,29 @@ const form = ref({
   privacyPolicies: false,
 })
 
+const loading = ref(false)
+
+const submit = async () => {
+  loading.value = true
+
+  try {
+    const payload: ICreateUser = {
+      name: form.value.username,
+      email: form.value.email,
+      password: form.value.password,
+    }
+    await useUser.createUser(payload)
+    toast.success('Usuário criado com sucesso! Faça login para continuar.')
+    router.push({ name: 'login' })
+  } catch (error: any) {
+    console.error('Error creating user:', error.response.data.error)
+    toast.error(error.response.data.error || 'Erro ao criar usuário. Por favor, tente novamente.')
+  }
+  finally {
+    loading.value = false
+  }
+}
+
 const isPasswordVisible = ref(false)
 </script>
 
@@ -41,152 +67,85 @@ const isPasswordVisible = ref(false)
     <div class="auth-logo d-flex align-center gap-x-3">
       <VNodeRenderer :nodes="themeConfig.app.logo" />
       <h1 class="auth-title">
-        {{ themeConfig.app.title }}
+        {{ themeConfig.app.subTitle }}
       </h1>
     </div>
   </RouterLink>
 
-  <VRow
-    no-gutters
-    class="auth-wrapper bg-surface"
-  >
-    <VCol
-      md="8"
-      class="d-none d-md-flex"
-    >
+  <VRow no-gutters class="auth-wrapper bg-surface">
+    <VCol md="8" class="d-none d-md-flex">
       <div class="position-relative bg-background w-100 me-0">
-        <div
-          class="d-flex align-center justify-center w-100 h-100"
-          style="padding-inline: 100px;"
-        >
-          <VImg
-            max-width="500"
-            :src="imageVariant"
-            class="auth-illustration mt-16 mb-2"
-          />
+        <div class="d-flex align-center justify-center w-100 h-100" style="padding-inline: 100px;">
+          <VImg max-width="500" :src="logoDisparaFacil" class="auth-illustration mt-16 mb-2" />
         </div>
 
-        <img
-          class="auth-footer-mask"
-          :src="authThemeMask"
-          alt="auth-footer-mask"
-          height="280"
-          width="100"
-        >
+        <img class="auth-footer-mask" :src="authThemeMask" alt="auth-footer-mask" height="280" width="100">
       </div>
     </VCol>
 
-    <VCol
-      cols="12"
-      md="4"
-      class="auth-card-v2 d-flex align-center justify-center"
-      style="background-color: rgb(var(--v-theme-surface));"
-    >
-      <VCard
-        flat
-        :max-width="500"
-        class="mt-12 mt-sm-0 pa-4"
-      >
+    <VCol cols="12" md="4" class="auth-card-v2 d-flex align-center justify-center"
+      style="background-color: rgb(var(--v-theme-surface));">
+      <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-4">
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Adventure starts here 🚀
+            A aventura começa aqui 🚀
           </h4>
           <p class="mb-0">
-            Make your app management easy and fun!
+            Faça sua gestão de campanhas fácil e divertida!
           </p>
         </VCardText>
 
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm @submit.prevent="() => submit()">
             <VRow>
               <!-- Username -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="form.username"
-                  :rules="[requiredValidator]"
-                  autofocus
-                  label="Username"
-                  placeholder="Johndoe"
-                />
+                <AppTextField v-model="form.username" :rules="[requiredValidator]" autofocus label="Nome"
+                  placeholder="Johndoe" />
               </VCol>
 
               <!-- email -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="form.email"
-                  :rules="[requiredValidator, emailValidator]"
-                  label="Email"
-                  type="email"
-                  placeholder="johndoe@email.com"
-                />
+                <AppTextField v-model="form.email" :rules="[requiredValidator, emailValidator]" label="Email"
+                  type="email" placeholder="johndoe@email.com" />
               </VCol>
 
               <!-- password -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="form.password"
-                  :rules="[requiredValidator]"
-                  label="Password"
-                  placeholder="············"
-                  :type="isPasswordVisible ? 'text' : 'password'"
+                <AppTextField v-model="form.password" :rules="[requiredValidator]" label="Senha"
+                  placeholder="············" :type="isPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                />
+                  @click:append-inner="isPasswordVisible = !isPasswordVisible" />
 
                 <div class="d-flex align-center my-6">
-                  <VCheckbox
-                    id="privacy-policy"
-                    v-model="form.privacyPolicies"
-                    inline
-                  />
-                  <VLabel
-                    for="privacy-policy"
-                    style="opacity: 1;"
-                  >
-                    <span class="me-1 text-high-emphasis">I agree to</span>
-                    <a
-                      href="javascript:void(0)"
-                      class="text-primary"
-                    >privacy policy & terms</a>
+                  <VCheckbox id="privacy-policy" v-model="form.privacyPolicies" inline />
+                  <VLabel for="privacy-policy" style="opacity: 1;">
+                    <span class="me-1 text-high-emphasis">Concordo com</span>
+                    <a href="javascript:void(0)" class="text-primary">Política de privacidade e termos</a>
                   </VLabel>
                 </div>
 
-                <VBtn
-                  block
-                  type="submit"
-                >
-                  Sign up
+                <VBtn block type="submit" :loading="loading">
+                  Inscrever-se
                 </VBtn>
               </VCol>
 
               <!-- create account -->
-              <VCol
-                cols="12"
-                class="text-center text-base"
-              >
-                <span class="d-inline-block">Already have an account?</span>
-                <RouterLink
-                  class="text-primary ms-1 d-inline-block"
-                  :to="{ name: 'login' }"
-                >
-                  Sign in instead
+              <VCol cols="12" class="text-center text-base">
+                <span class="d-inline-block">Já tem uma conta?</span>
+                <RouterLink class="text-primary ms-1 d-inline-block" :to="{ name: 'login' }">
+                  Faça login
                 </RouterLink>
               </VCol>
 
-              <VCol
-                cols="12"
-                class="d-flex align-center"
-              >
+              <VCol cols="12" class="d-flex align-center">
                 <VDivider />
-                <span class="mx-4">or</span>
+                <span class="mx-4">ou</span>
                 <VDivider />
               </VCol>
 
               <!-- auth providers -->
-              <VCol
-                cols="12"
-                class="text-center"
-              >
+              <VCol cols="12" class="text-center">
                 <AuthProvider />
               </VCol>
             </VRow>

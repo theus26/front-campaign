@@ -53,10 +53,12 @@ export function useProvidersManager() {
     creatingLoading.value = true;
     try {
       const provider: ICreateProvider = {
-        accountId: "d58900cc-9f9b-47ab-9e0f-84c69697da78",
+        userId: "4cfdfc46-b38e-4e28-94e0-a141f7170bf5",
         name: nameProvider.value,
         credential: nameProvider.value,
       };
+
+      console.log(provider);
 
       const response = await useProvider.createProvider(provider);
       base64.value = response ?? "";

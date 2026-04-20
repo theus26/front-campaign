@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { MessageData } from '@/@core/services/interfaces/campaign/ICampaign'
+import { MessageData } from '@/@core/services/interfaces/campaign/ICampaignService'
 import ChatLog from '@/pages/campaigns/components/ChatLogCampaign.vue'
 import { ChatMessage } from '@/plugins/fake-api/handlers/apps/chat/types'
 import { themes } from '@/plugins/vuetify/theme'

@@ -1,16 +1,27 @@
+import { router } from "@/plugins/1.router";
 import {
   IAuthConfig,
   IAuthService,
-  IBodyCadastrarSenha,
   IBodyLogin,
-  IDTOResetarSenha,
-  IDTOResponseLogin,
   IResponseAuth,
-  IResponseCadastrarSenha,
-  IResponseResetarSenha,
 } from "@core/services/interfaces/auth/IAuthService";
-import { AxiosInstance, AxiosResponse } from "axios";
+import { AxiosInstance } from "axios";
+import { useToast } from "vue-toast-notification";
 import authDefaultConfig from "./authDefaultConfig";
+
+let isRefreshing = false;
+let failedQueue: any[] = [];
+const toast = useToast();
+const userData = useCookie<any>("userData");
+
+function processQueue(error: any, token: string | null = null) {
+  failedQueue.forEach((prom) => {
+    if (error) prom.reject(error);
+    else prom.resolve(token);
+  });
+
+  failedQueue = [];
+}
 
 export default class AuthService implements IAuthService {
   axiosIns: AxiosInstance;
@@ -24,165 +35,96 @@ export default class AuthService implements IAuthService {
   }
 
   configureInterceptorsAxiosInstance(axiosIns: AxiosInstance) {
-    // Request Interceptor
     axiosIns.interceptors.request.use(
       (config) => {
-        const accessToken = this.getToken();
+        const accessToken = useCookie("accessToken").value;
+
         if (accessToken) {
-          config.headers.Authorization = `${this.serviceConfig.tokenType} ${accessToken}`;
+          config.headers.Authorization = `Bearer ${accessToken}`;
         }
-        config.headers.Domain = this.getDomain();
 
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     axiosIns.interceptors.response.use(
-      (response) => {
-        const currentRoute = window.location.pathname;
-        if (
-          typeof response.data === "string" &&
-          response.data.match(/^\s*<!DOCTYPE html/i)
-        ) {
-          this.logout({
-            sessaoExpirada: true,
-            statusCode: response.status,
-          });
-        }
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
 
-        return response;
-      },
-      (error) => {
-        const { response, code } = error;
+        if (error.response?.status === 401 && !originalRequest?._retry) {
+          originalRequest._retry = true;
 
-        if (
-          (response && (response.status === 401 || response.status === 403)) ||
-          code === "ERR_NETWORK"
-        ) {
-          this.logout({
-            sessaoExpirada: true,
-            statusCode: response.status,
-          });
+          const refreshToken = useCookie("refreshToken").value;
+
+          if (!refreshToken) {
+            this.logout();
+            return Promise.reject(error);
+          }
+
+          if (isRefreshing) {
+            return new Promise((resolve, reject) => {
+              failedQueue.push({ resolve, reject });
+            })
+              .then((token) => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                return axiosIns(originalRequest);
+              })
+              .catch((err) => Promise.reject(err));
+          }
+
+          isRefreshing = true;
+
+          try {
+            const response = await this.refreshToken(refreshToken);
+
+            const newAccessToken = response.token;
+            const newRefreshToken = response.refreshToken;
+
+            // 💾 salva novos tokens
+            useCookie("accessToken").value = newAccessToken;
+            useCookie("refreshToken").value = newRefreshToken;
+
+            processQueue(null, newAccessToken);
+
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+            return axiosIns(originalRequest);
+          } catch (err) {
+            processQueue(err, null);
+            this.logout();
+            return Promise.reject(err);
+          } finally {
+            isRefreshing = false;
+          }
         }
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 
-  logout(payload?: object): void {
-    const logoutEvento = new CustomEvent("logout", {
-      detail: payload,
+  async login(payload: IBodyLogin): Promise<IResponseAuth> {
+    const response = await this.axiosIns.post(
+      this.serviceConfig.loginEndpoint,
+      payload,
+    );
+    return response.data;
+  }
+
+  async refreshToken(refreshToken: string): Promise<IResponseAuth> {
+    const response = await this.axiosIns.post(this.serviceConfig.refreshToken, {
+      refreshToken,
     });
 
-    document.dispatchEvent(logoutEvento);
+    return response.data;
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.serviceConfig.storageTokenKeyName);
-  }
-
-  getRefreshToken(): string | null {
-    return localStorage.getItem(this.serviceConfig.storageRefreshTokenKeyName);
-  }
-
-  getExpiresAt(): string | null {
-    return localStorage.getItem(this.serviceConfig.storageExpiresAtKeyName);
-  }
-
-  getDomain(): string | null {
-    return localStorage.getItem(this.serviceConfig.storageDomainKeyName);
-  }
-
-  setToken(value: string): void {
-    localStorage.setItem(this.serviceConfig.storageTokenKeyName, value);
-  }
-
-  setRefreshToken(value: string): void {
-    localStorage.setItem(this.serviceConfig.storageRefreshTokenKeyName, value);
-  }
-
-  setExpiresAt(value: string): void {
-    localStorage.setItem(this.serviceConfig.storageExpiresAtKeyName, value);
-  }
-
-  setDomain(value: string): void {
-    localStorage.setItem(this.serviceConfig.storageDomainKeyName, value);
-  }
-
-  login(args: IBodyLogin): Promise<AxiosResponse<IResponseAuth>> {
-    return this.axiosIns
-      .post(this.serviceConfig.loginEndpoint, {
-        login: args,
-      })
-      .then((response: AxiosResponse<IDTOResponseLogin>) => {
-        return {
-          ...response,
-          data: response.data.d,
-        };
-      });
-  }
-
-  refreshToken(): Promise<IResponseAuth> {
-    return this.axiosIns.post(this.serviceConfig.refreshEndpoint, {
-      token: this.getToken(),
-      expiresAt: this.getExpiresAt(),
-      refreshToken: this.getRefreshToken(),
-    });
-  }
-
-  requestCadastrarSenha(
-    body: IBodyCadastrarSenha
-  ): Promise<AxiosResponse<IResponseCadastrarSenha>> {
-    const dados = {
-      viewModel: {
-        Guid: body.codigo,
-        UsuarioId: body.usuario,
-        SenhaNova: body.novaSenha,
-      },
-    };
-
-    return this.axiosIns
-      .post(this.serviceConfig.novaSenhaEndpoint, dados)
-      .then((resposta) => {
-        let mensagemError: any = "";
-        if (resposta.data.d) {
-          const dados = JSON.parse(resposta.data.d);
-          if (dados.Mensagens) {
-            mensagemError = dados.Mensagens;
-          }
-        }
-        return {
-          ...resposta,
-          data: {
-            Erros: mensagemError,
-          },
-        };
-      });
-  }
-
-  requestResetarSenha(
-    email: string,
-    fandiOne: boolean = true
-  ): Promise<AxiosResponse<IResponseResetarSenha>> {
-    return this.axiosIns
-      .post(this.serviceConfig.resetarSenhaEndpoint, { email, fandiOne })
-      .then((response) => {
-        let resultado = false;
-        let mensagem = "";
-        if (response.data.d) {
-          const resposta: IDTOResetarSenha = JSON.parse(response.data.d);
-          resultado = resposta.result;
-          mensagem = resposta.msg;
-        }
-        return {
-          ...response,
-          data: {
-            resultado: resultado,
-            mensagem: mensagem,
-          },
-        };
-      });
-  }
+  logout = async () => {
+    useCookie("accessToken").value = null;
+    userData.value = null;
+    router.push("/login");
+    toast.error("Sua sessão expirou. Faça login novamente para continuar.");
+  };
 }

@@ -1,17 +1,13 @@
 export default [
-  { heading: "Campanhas de WhatsApp" },
+  { heading: "Gestão de Campanhas" },
   {
-    title: "Gestão de Campanhas",
-    icon: { icon: "tabler-chart-donut-2" },
-    children: [
-      {
-        title: "Criar Nova Campanha",
-        to: "campaigns-create",
-      },
-      {
-        title: "Histórico de Campanhas",
-        to: "campaigns-list",
-      },
-    ],
+    title: "Criar Nova Campanha",
+    icon: { icon: "tabler-plus" },
+    to: "campaigns-create",
+  },
+  {
+    title: "Histórico de Campanhas",
+    icon: { icon: "tabler-history" },
+    to: "campaigns-list",
   },
 ];

@@ -1,4 +1,5 @@
-import useAuth from "@core/services/auth/useAuth";
+import useAuth from "@/services/auth/useAuth";
+import useUser from "@core/services/user/useUser";
 import axios from "axios";
 import defaultConfig from "../defaultConfig";
 
@@ -9,5 +10,5 @@ const axiosIns = axios.create({
   },
 });
 
-const { auth } = useAuth(axiosIns, {});
-export default auth;
+const { user } = useUser(axiosIns, useAuth);
+export default user;

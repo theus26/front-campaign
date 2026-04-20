@@ -5,7 +5,7 @@ const defaultConfig: IProviderConfig = {
   connectInstance: "provider/connectInstance",
   logoutProvider: "provider/logoutProvider",
   removeProvider: "provider/removeProvider",
-  getListProviders: "provider/getProvidersByAccountId",
+  getListProviders: "provider/GetProvidersByUserId",
   getConnectionState: "provider/getConnectionState",
   updateProvider: "provider/updateProvider",
 };

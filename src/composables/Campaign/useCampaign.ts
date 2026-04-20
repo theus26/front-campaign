@@ -233,11 +233,6 @@ export function useCampaignList() {
         value: reports.value.emAndamento,
         icon: "tabler-activity",
       },
-      {
-        title: "Rascunhos",
-        value: reports.value.rascunho,
-        icon: "tabler-edit",
-      },
     ];
   });
 

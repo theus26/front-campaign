@@ -6,6 +6,6 @@ const constants: Constants = {
   campaignServerAddress: "",
 };
 
-constants.campaignServerAddress = "http://localhost:5136/"
+constants.campaignServerAddress = "https://localhost:7050";
 
 export default constants;

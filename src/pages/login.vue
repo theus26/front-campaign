@@ -1,5 +1,7 @@
 <!-- ❗Errors in the form are set on line 60 -->
 <script setup lang="ts">
+import { IBodyLogin, IResponseAuth } from '@/@core/services/interfaces/auth/IAuthService'
+import useAuth from "@/services/auth/useAuth"
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import logoDisparaFacil from '@images/campaigns/dispara-facil-animation.png'
@@ -11,8 +13,8 @@ import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
+import { useToast } from 'vue-toast-notification'
 import { VForm } from 'vuetify/components/VForm'
-
 const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
@@ -25,7 +27,7 @@ definePage({
 })
 
 const isPasswordVisible = ref(false)
-
+const toast = useToast();
 const route = useRoute()
 const router = useRouter()
 
@@ -39,41 +41,62 @@ const errors = ref<Record<string, string | undefined>>({
 const refVForm = ref<VForm>()
 
 const credentials = ref({
-  email: 'admin@demo.com',
-  password: 'admin',
+  email: '',
+  password: '',
 })
+
+const loading = ref(false)
 
 const rememberMe = ref(false)
 
+const setSession = (data: IResponseAuth) => {
+  const { token, refreshToken, userData, userAbilityRules } = data;
+
+  useCookie("accessToken").value = token;
+  useCookie("refreshToken").value = refreshToken;
+  useCookie("userData").value = userData;
+
+  if (userAbilityRules) {
+    useCookie("userAbilityRules").value = userAbilityRules;
+    ability.update(userAbilityRules);
+  }
+}
+
 const login = async () => {
+  loading.value = true
   try {
-    const res = await $api('/auth/login', {
-      method: 'POST',
-      body: {
-        email: credentials.value.email,
-        password: credentials.value.password,
-      },
-      onResponseError({ response }) {
-        errors.value = response._data.errors
-      },
-    })
 
-    const { accessToken, userData, userAbilityRules } = res
 
-    useCookie('userAbilityRules').value = userAbilityRules
-    ability.update(userAbilityRules)
+    const payload: IBodyLogin = {
+      email: credentials.value.email,
+      password: credentials.value.password,
+    }
+    const response = await useAuth.login(payload)
 
-    useCookie('userData').value = userData
-    useCookie('accessToken').value = accessToken
+    const { token, refreshToken, userData, userAbilityRules } = response;
+
+    useCookie("userAbilityRules").value = userAbilityRules;
+    ability.update(userAbilityRules);
+
+    useCookie("userData").value = userData;
+    useCookie("accessToken").value = token;
+    useCookie("refreshToken").value = refreshToken;
 
     // Redirect to `to` query if exist or redirect to index route
     // ❗ nextTick is required to wait for DOM updates and later redirect
     await nextTick(() => {
-      router.replace(route.query.to ? String(route.query.to) : '/campaigns/home')
-    })
-  }
-  catch (err) {
-    console.error(err)
+
+      router.replace(route.query.to ? String(route.query.to) : "/");
+    });
+
+    router.push
+  } catch (err: any) {
+    toast.error(
+      errors.value.message ?? "Ocorreu um erro inesperado. Tente novamente."
+    );
+    console.error(err);
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -140,7 +163,7 @@ const onSubmit = () => {
                   </RouterLink>
                 </div>
 
-                <VBtn block type="submit">
+                <VBtn block type="submit" :loading="loading">
                   Login
                 </VBtn>
               </VCol>
