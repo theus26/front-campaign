@@ -23,7 +23,7 @@ export function useListProviderComposable(params: {
       erro.value = null;
 
       const filtro: IProviderFilter = {
-        userId: "4cfdfc46-b38e-4e28-94e0-a141f7170bf5",
+        //userId: "4cfdfc46-b38e-4e28-94e0-a141f7170bf5",
         search: search.value.trim(),
         page: page.value,
         pageSize: itemsPerPage.value,

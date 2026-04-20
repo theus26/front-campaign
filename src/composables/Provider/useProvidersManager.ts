@@ -53,7 +53,7 @@ export function useProvidersManager() {
     creatingLoading.value = true;
     try {
       const provider: ICreateProvider = {
-        userId: "4cfdfc46-b38e-4e28-94e0-a141f7170bf5",
+        //userId: "4cfdfc46-b38e-4e28-94e0-a141f7170bf5",
         name: nameProvider.value,
         credential: nameProvider.value,
       };
@@ -183,9 +183,6 @@ export function useProvidersManager() {
   };
 
   onMounted(async () => {
-    console.log("entrou no mounted");
-    console.log(loading.value);
-
     await loadProviders();
   });
 

@@ -36,7 +36,7 @@ export interface IProvider {
 export interface ICreateProvider {
   name: string;
   credential: string;
-  userId: string;
+  userId?: string;
 }
 
 export interface IConnectInstance {
@@ -69,7 +69,7 @@ export interface Instance {
 }
 
 export interface IProviderFilter {
-  userId: string;
+  userId?: string;
   search?: string | null;
   page?: number;
   pageSize?: number;
