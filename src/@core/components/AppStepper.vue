@@ -29,10 +29,7 @@ const props = withDefaults(defineProps<Props>(), {
   align: 'default',
 })
 
-onMounted(() => {
-  console.log(props.items);
 
-})
 
 const emit = defineEmits<Emit>()
 

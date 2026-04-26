@@ -21,8 +21,12 @@ export type IBodyLogin = {
 };
 
 export interface IResponseAuth {
-  token: string;
+  accessToken: string;
   refreshToken: string;
   userData: any;
   userAbilityRules: any;
+}
+
+export interface IRefreshTokenRequest {
+  refreshToken: string;
 }

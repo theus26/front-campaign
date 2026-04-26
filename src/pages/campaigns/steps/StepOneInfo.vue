@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { breakMessage, radioContent, recurrencePeriod } from '@/@core/useCreateCampaign.const';
 import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
-import { ref } from 'vue';
+import { useCreateDraftCampaign } from "@/composables/Campaign/useCreateDraftCampaign";
 import { VForm } from 'vuetify/components';
 
 const emit = defineEmits(['next']);
-const { stepOneForm, validateStepOne } = useCreateCampaign()
-const formRef = ref<VForm | null>(null);
-
+const { stepOneForm, formRef, validateStepOne } = useCreateCampaign()
+const { createDraft, loadingDraft } = useCreateDraftCampaign()
 
 const onNext = async () => {
   await validateStepOne(formRef.value)
@@ -79,7 +78,9 @@ const onNext = async () => {
 
       <VCol cols="12">
         <div class="d-flex flex-wrap gap-4 justify-end mt-8">
-          <VBtn color="secondary" variant="tonal" disabled>Salvar rascunho</VBtn>
+          <VBtn color="secondary" variant="tonal" @click="createDraft" :loading="loadingDraft">
+            Salvar rascunho
+          </VBtn>
           <VBtn type="submit">Próximo
             <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
           </VBtn>

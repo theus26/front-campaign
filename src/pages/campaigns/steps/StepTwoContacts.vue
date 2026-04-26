@@ -1,19 +1,16 @@
 <script setup lang="ts">
 import { typeContacts } from '@/@core/useCreateCampaign.const';
 import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
-import { ref } from 'vue';
+import { useCreateDraftCampaign } from "@/composables/Campaign/useCreateDraftCampaign";
 import { VForm } from 'vuetify/components';
 import NumbersPreview from '../components/NumbersPreview.vue';
 
 const emit = defineEmits(['next', 'back']);
-const { shippingNumbers, selectedContacts, message, addNumber, deleteNumber, handleFileUpload, validateStepTwo, loading } = useCreateCampaign()
-const formRef = ref<VForm | null>(null);
-const fileInput = ref<HTMLInputElement | null>(null)
-const fileName = ref('')
+const { shippingNumbers, selectedContacts, message, addNumber, deleteNumber, handleFileUpload, validateStepTwo, loading, fileName, fileInput, formRef } = useCreateCampaign()
+const { createDraft, loadingDraft } = useCreateDraftCampaign()
 
 
 const onNext = async () => {
-
   await validateStepTwo(formRef.value)
   emit('next');
 }
@@ -22,7 +19,6 @@ const onNext = async () => {
 <template>
   <VForm ref="formRef" @submit.prevent="onNext">
     <VRow>
-      <!-- Cabeçalho -->
       <VCol cols="12">
         <h6 class="text-h6 font-weight-medium">Público-alvo</h6>
         <p class="mb-0 text-body-2 text-gray-400">
@@ -30,13 +26,11 @@ const onNext = async () => {
         </p>
       </VCol>
 
-      <!-- Seleção de tipo de importação -->
       <VCol cols="12">
         <CustomRadios v-model:selected-radio="selectedContacts" :radio-content="typeContacts"
           :grid-column="{ sm: '6', cols: '12' }" />
       </VCol>
 
-      <!-- Opção manual -->
       <VCol cols="12" v-if="selectedContacts === 'manual'">
         <AppTextField v-model="message" clearable label="Adicione os números manualmente" placeholder="Ex: 559999999999"
           type="text">
@@ -58,11 +52,9 @@ const onNext = async () => {
         </VExpandTransition>
       </VCol>
 
-      <!-- Opção importação -->
       <VCol cols="12" v-if="selectedContacts === 'import'">
         <div class="upload-container" v-if="!shippingNumbers.length">
 
-          <!-- TÍTULO -->
           <div class="mb-3">
             <h6 class="text-h6 font-weight-medium">
               Importar contatos
@@ -72,7 +64,6 @@ const onNext = async () => {
             </p>
           </div>
 
-          <!-- DROPZONE -->
           <div class="dropzone" @click="fileInput?.click()">
             <VIcon icon="tabler-upload" size="32" class="mb-2 text-primary" />
 
@@ -87,13 +78,11 @@ const onNext = async () => {
             <input ref="fileInput" type="file" class="d-none" accept=".csv, .xlsx" @change="handleFileUpload" />
           </div>
 
-          <!-- INFO -->
           <div class="mt-3 text-caption text-medium-emphasis">
             ✔ Arquivos permitidos: <b>.csv</b> ou <b>.xlsx</b><br />
             ✔ Deve conter a coluna <b>"numeros"</b>
           </div>
 
-          <!-- FEEDBACK -->
           <VFadeTransition>
             <div v-if="fileName" class="mt-4 success-box">
               <VIcon icon="tabler-check" color="success" class="mr-2" />
@@ -113,12 +102,13 @@ const onNext = async () => {
         </VExpandTransition>
       </VCol>
 
-      <!-- Botões de navegação -->
       <VCol cols="12">
         <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
           <VBtn color="secondary" variant="tonal" @click="emit('back')">Voltar</VBtn>
           <div class="d-flex gap-4">
-            <VBtn color="secondary" variant="tonal">Salvar rascunho</VBtn>
+            <VBtn color="secondary" variant="tonal" @click="createDraft" :loading="loadingDraft">
+              Salvar rascunho
+            </VBtn>
             <VBtn type="submit">Próximo
               <VIcon icon="tabler-arrow-right" end />
             </VBtn>

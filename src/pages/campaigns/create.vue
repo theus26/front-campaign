@@ -59,17 +59,7 @@ const goBack = () => (currentStep.value = Math.max(currentStep.value - 1, 0))
       </VWindow>
     </VCardText>
 
-
-    <!-- Global dialogs: each dialog component manages its own v-model internally via composable/store -->
-    <!-- <ConnectProviderDialog />
-    <ReconnectProviderDialog />
-    <EditProviderDialog />
-    <DeleteProviderDialog />
-    <DisconnectProviderDialog /> -->
-
-
     <v-progress-linear v-if="loading" indeterminate color="primary" />
-
 
     <v-snackbar v-model="snackbar.visible" :color="snackbar.color" :timeout="3000" location="center">
       {{ snackbar.message }}

@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ICreateCampaign } from "@/@core/services/interfaces/campaign/ICampaignService";
 import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
+import { useCreateDraftCampaign } from "@/composables/Campaign/useCreateDraftCampaign";
 import { router } from "@/plugins/1.router";
 import useCampaignService from '@/services/campaign/useCampaign';
 import { CampaignDraft } from "@/store/campaign";
 import { computed, ref } from 'vue';
 import { useToast } from "vue-toast-notification";
 import MessageComponent from '../components/message.vue';
+
+const { createDraft, loadingDraft } = useCreateDraftCampaign()
 
 const { campaignStore } = useCreateCampaign()
 const toast = useToast();
@@ -29,7 +32,6 @@ const buildPayload = (payload: CampaignDraft): ICreateCampaign => {
     intervalMessage: payload.intervalMessage ?? undefined,
     startCampaign: payload.startCampaign,
     endCampaign: payload.endCampaign,
-    accountId: payload.accountId ?? undefined,
     providerId: payload.providerId ?? undefined,
   }
 }
@@ -134,7 +136,9 @@ onMounted(() => {
           </VBtn>
 
           <div class="d-flex gap-4">
-            <VBtn color="primary" variant="tonal">Salvar rascunho</VBtn>
+            <VBtn color="secondary" variant="tonal" @click="createDraft" :loading="loadingDraft">
+              Salvar rascunho
+            </VBtn>
 
             <VTooltip :disabled="canCreate">
               <template #activator="{ props }">

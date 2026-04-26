@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { defineStore } from 'pinia';
+import _ from "lodash";
+import { defineStore } from "pinia";
 
 export interface Messages {
   type: string | null;
@@ -57,7 +57,7 @@ const defaultCampaignDraft: CampaignDraft = {
   name: null,
   intervalRepeat: null,
   numbers: [],
-  messages:[],
+  messages: [],
   recurrence: null,
   startTime: null,
   timeEnd: null,
@@ -69,7 +69,7 @@ const defaultCampaignDraft: CampaignDraft = {
   accountId: null,
 };
 
-export const useCampaignStore = defineStore('campaign', {
+export const useCampaignStore = defineStore("campaign", {
   state: (): State => ({
     uiFlags: {
       isFetchingItem: false,
@@ -87,7 +87,7 @@ export const useCampaignStore = defineStore('campaign', {
     inbox: null,
     unsubscriber: null,
     inboxCounter: 0,
-    searchText: '',
+    searchText: "",
     campaignDraft: _.cloneDeep(defaultCampaignDraft),
   }),
 
@@ -102,16 +102,10 @@ export const useCampaignStore = defineStore('campaign', {
   },
   actions: {
     setDraft(payload: Partial<CampaignDraft>) {
-      const draft = _.omitBy(
-        {
-          ...this.campaignDraft,
-          ...payload,
-        },
-        (v) => v == null || v === ''
-      );
-
-      //draft.accountId = router.currentRoute.value.params.accountId;
-      this.campaignDraft = draft as unknown as CampaignDraft;
+      this.campaignDraft = {
+        ...this.campaignDraft,
+        ...payload,
+      };
     },
 
     clearDraft() {
@@ -172,4 +166,4 @@ export const useCampaignStore = defineStore('campaign', {
     //   }
     // },
   },
-})
+});

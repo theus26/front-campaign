@@ -157,6 +157,12 @@ export function useCampaignList() {
     ],
     Scheduled: [
       { key: "finish", label: "Encerrar", icon: "tabler-x", color: "error" },
+      {
+        key: "edit",
+        label: "Editar",
+        icon: "tabler-edit",
+        color: "primary",
+      },
     ],
     Draft: [
       { key: "finish", label: "Encerrar", icon: "tabler-x", color: "error" },
@@ -166,6 +172,12 @@ export function useCampaignList() {
         icon: "tabler-play",
         color: "success",
       },
+      {
+        key: "edit",
+        label: "Editar",
+        icon: "tabler-edit",
+        color: "primary",
+      },
     ],
     Closed: [
       {
@@ -173,6 +185,12 @@ export function useCampaignList() {
         label: "Reativar",
         icon: "tabler-refresh",
         color: "info",
+      },
+      {
+        key: "edit",
+        label: "Editar",
+        icon: "tabler-edit",
+        color: "primary",
       },
     ],
     Paused: [
@@ -182,6 +200,12 @@ export function useCampaignList() {
         label: "Reativar",
         icon: "tabler-play",
         color: "success",
+      },
+      {
+        key: "edit",
+        label: "Editar",
+        icon: "tabler-edit",
+        color: "primary",
       },
     ],
   };

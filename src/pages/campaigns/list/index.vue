@@ -140,6 +140,7 @@ const {
         </template>
 
         <template #item.actions="{ item }">
+
           <IconBtn>
             <VIcon icon="tabler-dots-vertical" />
 

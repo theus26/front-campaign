@@ -1,11 +1,14 @@
 import { useCampaignStore } from "@/store/campaign";
 import { useToast } from "vue-toast-notification";
+import { VForm } from "vuetify/components";
 import * as XLSX from "xlsx";
 
 export function useCreateCampaign() {
   const $toast = useToast();
   const campaignStore = useCampaignStore();
-
+  const toast = useToast();
+  const store = campaignStore;
+  const loadingDraft = ref(false);
   const loading = ref(false);
   const isCurrentStepValid = ref(true);
 
@@ -21,7 +24,9 @@ export function useCreateCampaign() {
     startTime: "",
     endTime: "",
   });
+  const formRef = ref<VForm | null>(null);
 
+  const fileName = ref("");
   const shippingNumbers = ref<string[]>([]);
   const selectedContacts = ref<"manual" | "import">("manual");
   const message = ref("");
@@ -30,7 +35,6 @@ export function useCreateCampaign() {
   const showCancelDialog = ref(false);
   const fileInput = ref<HTMLInputElement | null>(null);
 
-  // Helpers
   const getInterval = (value: string | undefined) => {
     if (!value) return null;
     const match = value.match(/\d+/);
@@ -88,7 +92,6 @@ export function useCreateCampaign() {
         ? validateIntervalRepeat(obj.intervalRepeat)
         : undefined,
       providerId: null,
-      accountId: "d58900cc-9f9b-47ab-9e0f-84c69697da78",
       status: "Draft",
     } as any;
   };
@@ -233,9 +236,31 @@ export function useCreateCampaign() {
     showCancelDialog.value = true;
   };
 
+  watch(
+    stepOneForm,
+    (newVal) => {
+      const campaign = getDetailCampaign(newVal);
+      campaignStore.setDraft(campaign);
+    },
+    { deep: true, immediate: true },
+  );
+
+  watch(
+    shippingNumbers,
+    (newVal) => {
+      campaignStore.setDraft({ numbers: newVal });
+    },
+    { deep: true },
+  );
+
+  watch(selectedContacts, (newVal) => {
+    campaignStore.setDraft({ recurrence: newVal });
+  });
+
   return {
     // UI
     loading,
+    fileName,
     isCurrentStepValid,
     currentStep,
     validateStepOne,
@@ -244,7 +269,7 @@ export function useCreateCampaign() {
 
     // forms
     stepOneForm,
-
+    formRef,
     // step2
     shippingNumbers,
     selectedContacts,

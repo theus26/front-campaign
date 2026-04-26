@@ -9,19 +9,8 @@ import { AxiosInstance } from "axios";
 import { useToast } from "vue-toast-notification";
 import authDefaultConfig from "./authDefaultConfig";
 
-let isRefreshing = false;
-let failedQueue: any[] = [];
 const toast = useToast();
 const userData = useCookie<any>("userData");
-
-function processQueue(error: any, token: string | null = null) {
-  failedQueue.forEach((prom) => {
-    if (error) prom.reject(error);
-    else prom.resolve(token);
-  });
-
-  failedQueue = [];
-}
 
 export default class AuthService implements IAuthService {
   axiosIns: AxiosInstance;
@@ -33,8 +22,23 @@ export default class AuthService implements IAuthService {
 
     this.configureInterceptorsAxiosInstance(this.axiosIns);
   }
-
   configureInterceptorsAxiosInstance(axiosIns: AxiosInstance) {
+    let isRefreshing = false;
+    let failedQueue: any[] = [];
+
+    const processQueue = (error: any, token: string | null = null) => {
+      failedQueue.forEach((prom) => {
+        if (error) {
+          prom.reject(error);
+        } else {
+          prom.resolve(token);
+        }
+      });
+
+      failedQueue = [];
+    };
+
+    // ✅ REQUEST
     axiosIns.interceptors.request.use(
       (config) => {
         const accessToken = useCookie("accessToken").value;
@@ -48,59 +52,80 @@ export default class AuthService implements IAuthService {
       (error) => Promise.reject(error),
     );
 
+    // ✅ RESPONSE
     axiosIns.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest?._retry) {
-          originalRequest._retry = true;
-
-          const refreshToken = useCookie("refreshToken").value;
-
-          if (!refreshToken) {
-            this.logout();
-            return Promise.reject(error);
-          }
-
-          if (isRefreshing) {
-            return new Promise((resolve, reject) => {
-              failedQueue.push({ resolve, reject });
-            })
-              .then((token) => {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
-                return axiosIns(originalRequest);
-              })
-              .catch((err) => Promise.reject(err));
-          }
-
-          isRefreshing = true;
-
-          try {
-            const response = await this.refreshToken(refreshToken);
-
-            const newAccessToken = response.token;
-            const newRefreshToken = response.refreshToken;
-
-            // 💾 salva novos tokens
-            useCookie("accessToken").value = newAccessToken;
-            useCookie("refreshToken").value = newRefreshToken;
-
-            processQueue(null, newAccessToken);
-
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-            return axiosIns(originalRequest);
-          } catch (err) {
-            processQueue(err, null);
-            this.logout();
-            return Promise.reject(err);
-          } finally {
-            isRefreshing = false;
-          }
+        // ❌ não é 401
+        if (error.response?.status !== 401) {
+          return Promise.reject(error);
         }
 
-        return Promise.reject(error);
+        // ❌ evitar loop infinito
+        if (originalRequest._retry) {
+          return Promise.reject(error);
+        }
+
+        // ❌ não interceptar refresh
+        if (originalRequest.url.includes("/refresh")) {
+          return Promise.reject(error);
+        }
+
+        const refreshToken = useCookie("refreshToken").value;
+
+        if (!refreshToken) {
+          this.logout();
+          return Promise.reject(error);
+        }
+
+        // 🔒 se já está atualizando, entra na fila
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({
+              resolve: (token: string) => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                resolve(axiosIns(originalRequest));
+              },
+              reject: (err: any) => {
+                reject(err);
+              },
+            });
+          });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          // ⚠️ IMPORTANTE: ideal usar outro axios aqui
+          const response = await this.refreshToken(refreshToken);
+
+          const newAccessToken = response.accessToken;
+          const newRefreshToken = response.refreshToken;
+
+          // 💾 salva novos tokens
+          useCookie("accessToken").value = newAccessToken;
+          useCookie("refreshToken").value = newRefreshToken;
+
+          // atualiza header global
+          axiosIns.defaults.headers.common["Authorization"] =
+            `Bearer ${newAccessToken}`;
+
+          processQueue(null, newAccessToken);
+
+          // atualiza request original
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+          return axiosIns(originalRequest);
+        } catch (err) {
+          processQueue(err, null);
+          this.logout();
+          return Promise.reject(err);
+        } finally {
+          isRefreshing = false;
+        }
       },
     );
   }
@@ -117,6 +142,7 @@ export default class AuthService implements IAuthService {
     const response = await this.axiosIns.post(this.serviceConfig.refreshToken, {
       refreshToken,
     });
+    console.log(response.data);
 
     return response.data;
   }

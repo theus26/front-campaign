@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
+import { useCreateDraftCampaign } from '@/composables/Campaign/useCreateDraftCampaign';
 import { useProvidersManager } from '@/composables/Provider/useProvidersManager';
 import { VForm } from 'vuetify/components';
 import ConnectProviderDialog from '../dialogs/ConnectProviderDialog.vue';
@@ -8,6 +9,8 @@ import DisconnectProviderDialog from '../dialogs/DisconnectProviderDialog.vue';
 import EditProviderDialog from '../dialogs/EditProviderDialog.vue';
 import QrCodeModal from '../dialogs/QrCodeModal.vue';
 import ReconnectProviderDialog from '../dialogs/ReconnectProviderDialog.vue';
+
+const { createDraft, loadingDraft } = useCreateDraftCampaign()
 
 const {
   providers,
@@ -169,7 +172,7 @@ const onNext = async () => {
           </VBtn>
 
           <div class="d-flex gap-4">
-            <VBtn color="secondary" variant="tonal">
+            <VBtn color="secondary" variant="tonal" @click="createDraft" :loading="loadingDraft">
               Salvar rascunho
             </VBtn>
 
