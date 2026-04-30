@@ -16,7 +16,7 @@ export function useCreateDraftCampaign() {
       name: payload.name ?? "",
       content: payload.messages ?? [],
       numbers: payload.numbers ?? [],
-      intervalRepeat: payload.intervalRepeat ?? undefined,
+      intervalRepeat: payload.intervalRepeat?.toString(),
       recurrence:
         payload.recurrence?.toLowerCase() == "unica" ? "Unique" : "Recurrent",
       startTime: payload.startTime,

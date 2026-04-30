@@ -142,7 +142,6 @@ export default class AuthService implements IAuthService {
     const response = await this.axiosIns.post(this.serviceConfig.refreshToken, {
       refreshToken,
     });
-    console.log(response.data);
 
     return response.data;
   }

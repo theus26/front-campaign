@@ -6,12 +6,14 @@ import {
 import useProvider from "@/services/provider/useProvider";
 import { useCampaignStore } from "@/store/campaign";
 import { ref } from "vue";
+import { useRoute } from "vue-router";
 import { useToast } from "vue-toast-notification";
 import { VForm } from "vuetify/components";
 import { useListProviderComposable } from "./useListProviderComposable";
 
 export function useProvidersManager() {
   const toast = useToast();
+  const route = useRoute();
   const campaignStore = useCampaignStore();
 
   const selectedProvider = ref<IProvider>();
@@ -178,6 +180,34 @@ export function useProvidersManager() {
         return { color: "error", text: "Desconectado" };
     }
   };
+
+  const isEdit = computed(() => !!route.params.id);
+
+  watch(
+    [() => campaignStore.campaignDraft.providerId, providers, isEdit],
+    ([providerId, providerList, editing]) => {
+      if (!editing) return;
+
+      if (!providerId || !providerList?.length) {
+        selectedProvider.value = undefined;
+        selectedProviderArr.value = [];
+        return;
+      }
+
+      const selecionado =
+        providerList.find(
+          (provider) =>
+            String(provider.providerId).trim() === String(providerId).trim(),
+        ) ?? undefined;
+
+      selectedProvider.value = selecionado;
+
+      selectedProviderArr.value = selecionado ? [selecionado] : [];
+    },
+    {
+      immediate: true,
+    },
+  );
 
   onMounted(async () => {
     await loadProviders();

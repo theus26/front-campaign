@@ -49,7 +49,7 @@ const {
 
 } = useProvidersManager()
 
-const { validateStepThree } = useCreateCampaign()
+const { validateStepThree, updateCampaign, isEdit } = useCreateCampaign()
 
 const emit = defineEmits<{
   (e: "next"): void;
@@ -60,6 +60,11 @@ const onNext = async () => {
   validateStepThree(formRef.value)
   emit('next')
 }
+
+watchEffect(() => {
+  console.log('aqui');
+
+})
 
 </script>
 
@@ -164,26 +169,35 @@ const onNext = async () => {
         </VDataTableServer>
       </VCol>
 
-      <VCol cols="12" v-if="!loading">
-        <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
-          <VBtn color="secondary" variant="tonal" @click="$emit('back')">
-            <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-            Voltar
-          </VBtn>
 
-          <div class="d-flex gap-4">
-            <VBtn color="secondary" variant="tonal" @click="createDraft" :loading="loadingDraft">
-              Salvar rascunho
-            </VBtn>
-
-            <VBtn type="submit">
-              Próximo
-              <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
-            </VBtn>
-          </div>
-        </div>
-      </VCol>
     </VRow>
+    <div class="d-flex justify-space-between align-center mt-8 flex-wrap gap-4">
+
+      <!-- ESQUERDA -->
+      <div>
+        <VBtn v-if="isEdit" color="info" variant="tonal">
+          <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
+          Voltar
+        </VBtn>
+      </div>
+
+      <!-- DIREITA -->
+      <div class="d-flex gap-4">
+        <VBtn v-if="isEdit" color="warning" variant="tonal" @click="updateCampaign" :loading="loading">
+          Salvar Alterações
+        </VBtn>
+
+        <VBtn v-else color="info" variant="tonal" @click="createDraft" :loading="loadingDraft">
+          Salvar rascunho
+        </VBtn>
+
+        <VBtn type="submit" color="primary" variant="elevated">
+          Próximo
+          <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
+        </VBtn>
+      </div>
+
+    </div>
   </VForm>
 
   <QrCodeModal v-model="qrcodeModal" :base64="base64" :name="nameProvider" @next="onNext" />

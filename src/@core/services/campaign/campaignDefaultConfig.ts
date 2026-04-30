@@ -4,7 +4,7 @@ const defaultConfig: ICampaignConfig = {
   createCampaign: "campaign/createCampaingn",
   updateCampaign: "/campaign/updateCampaign",
   deleteCampaign: "/campaign/deleteCampaign",
-  getCampaign: "/campaign/getCampaign",
+  getCampaignById: "/campaign/GetCampaignById",
   getListCampaigns: "/campaign/ListCampaigns",
   reportsCampaigns: "Relatorios/RelatorioCampanhas",
 };

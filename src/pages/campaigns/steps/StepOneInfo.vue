@@ -5,7 +5,7 @@ import { useCreateDraftCampaign } from "@/composables/Campaign/useCreateDraftCam
 import { VForm } from 'vuetify/components';
 
 const emit = defineEmits(['next']);
-const { stepOneForm, formRef, validateStepOne } = useCreateCampaign()
+const { stepOneForm, formRef, isEdit, loading, validateStepOne, updateCampaign } = useCreateCampaign()
 const { createDraft, loadingDraft } = useCreateDraftCampaign()
 
 const onNext = async () => {
@@ -18,7 +18,7 @@ const onNext = async () => {
   <VForm ref="formRef" @submit.prevent="onNext">
     <VRow>
       <VCol cols="12">
-        <h6 class="text-h6 font-weight-medium">Informações da campanha</h6>
+        <h6 class="text-h6 font-weight-medium"> {{ isEdit ? 'Atualizar' : '' }} Informações da campanha</h6>
         <p class="mb-0">Preencha os dados essenciais, escolha o tipo, defina a recorrência, agende os disparos e
           estabeleça o intervalo de tempo.</p>
       </VCol>
@@ -51,13 +51,14 @@ const onNext = async () => {
 
       <VCol cols="12" md="6">
         <VLabel class="mb-1 text-body-2" text="Tempo de disparo das mensagens *" />
-        <AppSelect :items="breakMessage" v-model="stepOneForm.messageBreak" />
+        <AppSelect :items="breakMessage" item-title="label" item-value="value" v-model="stepOneForm.messageBreak" />
       </VCol>
 
 
       <VCol cols="12" md="6" v-if="stepOneForm.typeCampaign === 'recorrente'">
         <VLabel class="mb-1 text-body-2" text="Período de recorrência *" />
-        <AppSelect :items="recurrencePeriod" v-model="stepOneForm.intervalRepeat" />
+        <AppSelect :items="recurrencePeriod" item-title="label" item-value="value"
+          v-model="stepOneForm.intervalRepeat" />
       </VCol>
 
 
@@ -76,16 +77,35 @@ const onNext = async () => {
       </VCol>
 
 
-      <VCol cols="12">
-        <div class="d-flex flex-wrap gap-4 justify-end mt-8">
-          <VBtn color="secondary" variant="tonal" @click="createDraft" :loading="loadingDraft">
-            Salvar rascunho
-          </VBtn>
-          <VBtn type="submit">Próximo
-            <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
-          </VBtn>
-        </div>
-      </VCol>
     </VRow>
+
+
+    <div class="d-flex justify-space-between align-center mt-8 flex-wrap gap-4">
+
+      <!-- ESQUERDA -->
+      <div>
+        <VBtn v-if="isEdit" color="info" variant="tonal">
+          <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
+          Voltar
+        </VBtn>
+      </div>
+
+      <!-- DIREITA -->
+      <div class="d-flex gap-4">
+        <VBtn v-if="isEdit" color="warning" variant="tonal" @click="updateCampaign" :loading="loading">
+          Salvar Alterações
+        </VBtn>
+
+        <VBtn v-else color="info" variant="tonal" @click="createDraft" :loading="loadingDraft">
+          Salvar rascunho
+        </VBtn>
+
+        <VBtn type="submit" color="primary" variant="elevated">
+          Próximo
+          <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
+        </VBtn>
+      </div>
+
+    </div>
   </VForm>
 </template>

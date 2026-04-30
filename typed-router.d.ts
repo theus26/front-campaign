@@ -60,6 +60,7 @@ declare module 'vue-router/auto-routes' {
     'campaigns-dialogs-qr-code-modal': RouteRecordInfo<'campaigns-dialogs-qr-code-modal', '/campaigns/dialogs/QrCodeModal', Record<never, never>, Record<never, never>>,
     'campaigns-dialogs-reconnect-provider-dialog': RouteRecordInfo<'campaigns-dialogs-reconnect-provider-dialog', '/campaigns/dialogs/ReconnectProviderDialog', Record<never, never>, Record<never, never>>,
     'campaigns-dialogs-success-dialog': RouteRecordInfo<'campaigns-dialogs-success-dialog', '/campaigns/dialogs/SuccessDialog', Record<never, never>, Record<never, never>>,
+    'campaigns-edit-id': RouteRecordInfo<'campaigns-edit-id', '/campaigns/edit/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'campaigns-home': RouteRecordInfo<'campaigns-home', '/campaigns/home', Record<never, never>, Record<never, never>>,
     'campaigns-list': RouteRecordInfo<'campaigns-list', '/campaigns/list', Record<never, never>, Record<never, never>>,
     'campaigns-steps-step-four-message': RouteRecordInfo<'campaigns-steps-step-four-message', '/campaigns/steps/StepFourMessage', Record<never, never>, Record<never, never>>,

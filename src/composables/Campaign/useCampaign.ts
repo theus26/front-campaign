@@ -1,4 +1,5 @@
 import { IReportsCampaigns } from "@/@core/services/interfaces/campaign/ICampaignService";
+import { router } from "@/plugins/1.router";
 import useCampaign from "@/services/campaign/useCampaign";
 import { ref } from "vue";
 import { useListCampaign } from "./useListCampaign";
@@ -229,6 +230,10 @@ export function useCampaignList() {
 
       case "reactivate":
         console.log("Reativar", item);
+        break;
+
+      case "edit":
+        router.push(`/campaigns/edit/${item.campaignId}`);
         break;
     }
   };

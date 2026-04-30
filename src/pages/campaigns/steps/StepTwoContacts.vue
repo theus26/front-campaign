@@ -6,7 +6,7 @@ import { VForm } from 'vuetify/components';
 import NumbersPreview from '../components/NumbersPreview.vue';
 
 const emit = defineEmits(['next', 'back']);
-const { shippingNumbers, selectedContacts, message, addNumber, deleteNumber, handleFileUpload, validateStepTwo, loading, fileName, fileInput, formRef } = useCreateCampaign()
+const { shippingNumbers, selectedContacts, message, loading, fileName, fileInput, formRef, isEdit, addNumber, deleteNumber, handleFileUpload, validateStepTwo, updateCampaign } = useCreateCampaign()
 const { createDraft, loadingDraft } = useCreateDraftCampaign()
 
 
@@ -53,7 +53,7 @@ const onNext = async () => {
       </VCol>
 
       <VCol cols="12" v-if="selectedContacts === 'import'">
-        <div class="upload-container" v-if="!shippingNumbers.length">
+        <div class="upload-container">
 
           <div class="mb-3">
             <h6 class="text-h6 font-weight-medium">
@@ -102,20 +102,35 @@ const onNext = async () => {
         </VExpandTransition>
       </VCol>
 
-      <VCol cols="12">
-        <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
-          <VBtn color="secondary" variant="tonal" @click="emit('back')">Voltar</VBtn>
-          <div class="d-flex gap-4">
-            <VBtn color="secondary" variant="tonal" @click="createDraft" :loading="loadingDraft">
-              Salvar rascunho
-            </VBtn>
-            <VBtn type="submit">Próximo
-              <VIcon icon="tabler-arrow-right" end />
-            </VBtn>
-          </div>
-        </div>
-      </VCol>
+
     </VRow>
+    <div class="d-flex justify-space-between align-center mt-8 flex-wrap gap-4">
+
+      <!-- ESQUERDA -->
+      <div>
+        <VBtn v-if="isEdit" color="info" variant="tonal">
+          <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
+          Voltar
+        </VBtn>
+      </div>
+
+      <!-- DIREITA -->
+      <div class="d-flex gap-4">
+        <VBtn v-if="isEdit" color="warning" variant="tonal" @click="updateCampaign" :loading="loading">
+          Salvar Alterações
+        </VBtn>
+
+        <VBtn v-else color="info" variant="tonal" @click="createDraft" :loading="loadingDraft">
+          Salvar rascunho
+        </VBtn>
+
+        <VBtn type="submit" color="primary" variant="elevated">
+          Próximo
+          <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
+        </VBtn>
+      </div>
+
+    </div>
   </VForm>
 </template>
 

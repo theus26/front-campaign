@@ -1,4 +1,11 @@
+import {
+  ICampaign,
+  IUpdateCampaign,
+} from "@/@core/services/interfaces/campaign/ICampaignService";
+import { router } from "@/plugins/1.router";
+import useCampaign from "@/services/campaign/useCampaign";
 import { useCampaignStore } from "@/store/campaign";
+import { useRoute } from "vue-router";
 import { useToast } from "vue-toast-notification";
 import { VForm } from "vuetify/components";
 import * as XLSX from "xlsx";
@@ -6,26 +13,26 @@ import * as XLSX from "xlsx";
 export function useCreateCampaign() {
   const $toast = useToast();
   const campaignStore = useCampaignStore();
-  const toast = useToast();
-  const store = campaignStore;
-  const loadingDraft = ref(false);
+
+  const route = useRoute();
+  const isEdit = computed(() => !!route.params.id);
+
   const loading = ref(false);
   const isCurrentStepValid = ref(true);
-
   const currentStep = ref(0);
 
-  const stepOneForm = ref({
+  const stepOneForm = reactive({
     nameCampaign: "",
-    typeCampaign: "unica",
-    dataStart: "",
-    dataEnd: "",
-    intervalRepeat: "",
-    messageBreak: "",
+    typeCampaign: "",
+    dataStart: null,
+    dataEnd: null,
+    messageBreak: null,
+    intervalRepeat: null,
     startTime: "",
     endTime: "",
   });
   const formRef = ref<VForm | null>(null);
-
+  const campaign = ref<ICampaign | null>(null);
   const fileName = ref("");
   const shippingNumbers = ref<string[]>([]);
   const selectedContacts = ref<"manual" | "import">("manual");
@@ -35,22 +42,7 @@ export function useCreateCampaign() {
   const showCancelDialog = ref(false);
   const fileInput = ref<HTMLInputElement | null>(null);
 
-  const getInterval = (value: string | undefined) => {
-    if (!value) return null;
-    const match = value.match(/\d+/);
-    return match ? parseInt(match[0], 10) : null;
-  };
-
-  const validateIntervalMessage = (value?: string) => {
-    const interval = getInterval(value ?? "");
-    if (interval === 5) return "00:05";
-    if (interval === 3) return "00:03";
-    if (interval === 2) return "00:02";
-    if (interval === 1) return "00:01";
-    return null;
-  };
-
-  const convertStringForDate = (value?: string) => {
+  const convertStringForDate = (value?: string | null) => {
     if (!value) return undefined;
     const d = new Date(value);
     return d.toISOString();
@@ -76,32 +68,20 @@ export function useCreateCampaign() {
   };
 
   const getDetailCampaign = (obj: any) => {
-    const intervalMsg = validateIntervalMessage(obj.messageBreak);
     return {
       campaignId: null,
       name: obj.nameCampaign,
-      numbers: [],
-      messages: [],
+      numbers: obj.numbers || [],
+      messages: obj.messages || [],
       startCampaign: convertStringForDate(obj.dataStart),
       endCampaign: convertStringForDate(obj.dataEnd),
       startTime: obj.startTime,
       timeEnd: obj.endTime,
       recurrence: obj.typeCampaign,
-      intervalMessage: intervalMsg,
-      intervalRepeat: obj.intervalRepeat
-        ? validateIntervalRepeat(obj.intervalRepeat)
-        : undefined,
-      providerId: null,
+      intervalMessage: obj.messageBreak,
+      intervalRepeat: obj.intervalRepeat,
       status: "Draft",
     } as any;
-  };
-
-  const validateIntervalRepeat = (value?: string) => {
-    if (!value) return undefined;
-    if (value === "Diário") return 1;
-    if (value === "Semanal") return 7;
-    if (value === "Mensal") return 30;
-    return undefined;
   };
 
   const validateStepOne = async (item: any) => {
@@ -110,15 +90,12 @@ export function useCreateCampaign() {
         isCurrentStepValid.value = false;
         return;
       }
-      if (
-        !validateTime(stepOneForm.value.startTime, stepOneForm.value.endTime)
-      ) {
+      if (!validateTime(stepOneForm.startTime, stepOneForm.endTime)) {
         isCurrentStepValid.value = false;
         return;
       }
 
-      const campaign = getDetailCampaign(stepOneForm.value);
-      console.log("campaign", campaign);
+      const campaign = getDetailCampaign(stepOneForm);
 
       campaignStore.setDraft(campaign);
       currentStep.value++;
@@ -232,8 +209,74 @@ export function useCreateCampaign() {
   };
 
   const handleCancel = () => {
-    // apenas fechar/registrar
     showCancelDialog.value = true;
+  };
+
+  const updatePayload = (): IUpdateCampaign => {
+    return {
+      ...campaign.value,
+
+      name: stepOneForm.nameCampaign ?? campaign.value?.name,
+      startCampaign: stepOneForm.dataStart
+        ? convertStringForDate(stepOneForm.dataStart)
+        : campaign.value?.startCampaign,
+
+      endCampaign: stepOneForm.dataEnd
+        ? convertStringForDate(stepOneForm.dataEnd)
+        : campaign.value?.endCampaign,
+
+      startTime: stepOneForm.startTime ?? campaign.value?.startTime,
+      timeEnd: stepOneForm.endTime ?? campaign.value?.timeEnd,
+      recurrence: stepOneForm.typeCampaign == "unica" ? "Unique" : "Recurrent",
+
+      intervalMessage:
+        stepOneForm.messageBreak ?? campaign.value?.intervalMessage,
+
+      intervalRepeat:
+        stepOneForm.intervalRepeat ?? campaign.value?.intervalRepeat,
+
+      numbers: shippingNumbers.value ?? campaign.value?.numbers,
+      status: "Draft",
+      providerId:
+        campaignStore.getDraft.providerId ?? campaign.value?.providerId,
+    };
+  };
+
+  const updateCampaign = async () => {
+    loading.value = true;
+    try {
+      const campaignId = String(route.params.id);
+      const payload = updatePayload();
+      console.log(payload);
+
+      await useCampaign.updateCampaign(campaignId, payload);
+      $toast.success("Campanha atualizada com sucesso!");
+      router.push("/campaigns/list");
+    } catch (error) {
+      $toast.error("Erro ao atualizar campanha. Tente novamente.");
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const fillCampaign = (data: any) => {
+    stepOneForm.nameCampaign = data.name;
+    stepOneForm.typeCampaign =
+      data.recurrence === "Unique" ? "unica" : "recorrente";
+    stepOneForm.dataStart = data.startCampaign;
+    stepOneForm.dataEnd = data.endCampaign;
+    stepOneForm.messageBreak = data.intervalMessage;
+    stepOneForm.intervalRepeat = data.intervalRepeat;
+    stepOneForm.startTime = data.startTime;
+    stepOneForm.endTime = data.timeEnd;
+    // STEP TWO
+    shippingNumbers.value = data.numbers || [];
+
+    // STEP THREE -
+
+    campaignStore.setDraft({
+      providerId: data.providerId,
+    });
   };
 
   watch(
@@ -257,6 +300,15 @@ export function useCreateCampaign() {
     campaignStore.setDraft({ recurrence: newVal });
   });
 
+  onMounted(async () => {
+    if (isEdit.value) {
+      campaign.value = await useCampaign.getCampaignById(
+        String(route.params.id),
+      );
+      fillCampaign(campaign.value);
+    }
+  });
+
   return {
     // UI
     loading,
@@ -270,6 +322,7 @@ export function useCreateCampaign() {
     // forms
     stepOneForm,
     formRef,
+    isEdit,
     // step2
     shippingNumbers,
     selectedContacts,
@@ -278,6 +331,7 @@ export function useCreateCampaign() {
     deleteNumber,
     fileInput,
     handleFileUpload,
+    updateCampaign,
     showSuccessDialogDesconectar,
     showSuccessDialogExcluir,
     showCancelDialog,

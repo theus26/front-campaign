@@ -21,7 +21,7 @@ export const radioContent = [
   {
     title: "Recorrente",
     value: "recorrente",
-    desc: "Envie mensagens automáticas de maneira recorrente para seus contatos.",
+    desc: "Envie mensagens automáticas recorrentes para seus contatos.",
   },
 ];
 
@@ -39,10 +39,14 @@ export const typeContacts = [
 ];
 
 export const breakMessage = [
-  "A cada 5 min - Recomendado",
-  "A cada 3 min",
-  "A cada 2 min - Risco de banimento",
-  "A cada 1 min - Alto risco de banimento",
+  { label: "A cada 5 min - Recomendado", value: "00:05:00" },
+  { label: "A cada 3 min", value: "00:03:00" },
+  { label: "A cada 2 min - Risco de banimento", value: "00:02:00" },
+  { label: "A cada 1 min - Alto risco de banimento", value: "00:01:00" },
 ];
 
-export const recurrencePeriod = ["Diário", "Semanal", "Mensal"];
+export const recurrencePeriod = [
+  { label: "Diário", value: "1.00:00:00" }, // 1 dia
+  { label: "Semanal", value: "7.00:00:00" }, // 7 dias
+  { label: "Mensal", value: "30.00:00:00" }, // 30 dias (aprox)
+];

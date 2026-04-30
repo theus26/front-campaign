@@ -24,7 +24,7 @@ const buildPayload = (payload: CampaignDraft): ICreateCampaign => {
     name: payload.name ?? '',
     content: payload.messages ?? [],
     numbers: payload.numbers ?? [],
-    intervalRepeat: payload.intervalRepeat ?? undefined,
+    intervalRepeat: payload.intervalRepeat?.toString() ?? undefined,
     recurrence: payload.recurrence?.toLowerCase() == "unica" ? "Unique" : "Recurrent",
     startTime: payload.startTime,
     timeEnd: payload.timeEnd,
