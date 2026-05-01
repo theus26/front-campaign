@@ -61,10 +61,6 @@ const onNext = async () => {
   emit('next')
 }
 
-watchEffect(() => {
-  console.log('aqui');
-
-})
 
 </script>
 
@@ -171,11 +167,11 @@ watchEffect(() => {
 
 
     </VRow>
-    <div class="d-flex justify-space-between align-center mt-8 flex-wrap gap-4">
+    <div v-if="!loading" class="d-flex justify-space-between align-center mt-8 flex-wrap gap-4">
 
       <!-- ESQUERDA -->
       <div>
-        <VBtn v-if="isEdit" color="info" variant="tonal">
+        <VBtn color="info" variant="tonal" @click="$emit('back')">
           <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
           Voltar
         </VBtn>

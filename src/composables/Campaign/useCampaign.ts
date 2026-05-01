@@ -1,10 +1,16 @@
-import { IReportsCampaigns } from "@/@core/services/interfaces/campaign/ICampaignService";
+import {
+  ICampaign,
+  IReportsCampaigns,
+  IUpdateCampaign,
+} from "@/@core/services/interfaces/campaign/ICampaignService";
 import { router } from "@/plugins/1.router";
 import useCampaign from "@/services/campaign/useCampaign";
 import { ref } from "vue";
+import { useToast } from "vue-toast-notification";
 import { useListCampaign } from "./useListCampaign";
 
 export function useCampaignList() {
+  const toast = useToast();
   const searchQuery = ref("");
   const itemsPerPage = ref(10);
   const page = ref(1);
@@ -215,26 +221,54 @@ export function useCampaignList() {
     return campaignActionsMap[status as keyof typeof campaignActionsMap] ?? [];
   };
 
-  const handleAction = (actionKey: string, item: any) => {
-    switch (actionKey) {
-      case "pause":
-        break;
+  const mapCampaignToUpdate = (
+    campaign: ICampaign,
+    status: IUpdateCampaign["status"],
+  ): IUpdateCampaign => ({
+    name: campaign.name ?? "",
+    intervalRepeat: campaign.intervalRepeat ?? null,
+    content: campaign.content ?? [],
+    numbers: campaign.numbers ?? [],
+    recurrence: campaign.recurrence ?? null,
+    startTime: campaign.startTime ?? null,
+    timeEnd: campaign.timeEnd ?? null,
+    status,
+    intervalMessage: campaign.intervalMessage ?? "",
+    startCampaign: campaign.startCampaign ?? null,
+    endCampaign: campaign.endCampaign ?? null,
+    providerId: campaign.providerId,
+  });
 
-      case "finish":
-        console.log("Encerrar", item);
-        break;
+  const handleAction = async (actionKey: string, item: ICampaign) => {
+    if (actionKey === "edit") {
+      router.push(`/campaigns/edit/${item.campaignId}`);
+      return;
+    }
 
-      case "activate":
-        console.log("Ativar", item);
-        break;
+    const statusMap: Record<string, IUpdateCampaign["status"]> = {
+      pause: "Paused",
+      finish: "Closed",
+      activate: "InProgress",
+      reactivate: "InProgress",
+    };
 
-      case "reactivate":
-        console.log("Reativar", item);
-        break;
+    const newStatus = statusMap[actionKey];
 
-      case "edit":
-        router.push(`/campaigns/edit/${item.campaignId}`);
-        break;
+    if (!newStatus) {
+      console.log("Ação não mapeada:", actionKey);
+      return;
+    }
+
+    try {
+      const updatePayload = mapCampaignToUpdate(item, newStatus);
+      await useCampaign.updateCampaign(item.campaignId, updatePayload);
+      toast.success(
+        `Campanha ${item.name} atualizada para ${resolveStatus(newStatus).label}`,
+      );
+      await loadCampaigns();
+    } catch (error) {
+      toast.error(`Erro ao executar ação ${actionKey}`);
+      console.error(`Erro ao executar ação ${actionKey}:`, error);
     }
   };
 

@@ -4,7 +4,7 @@ import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
 import { useCreateDraftCampaign } from "@/composables/Campaign/useCreateDraftCampaign";
 import { VForm } from 'vuetify/components';
 
-const emit = defineEmits(['next']);
+const emit = defineEmits(['next', 'back']);
 const { stepOneForm, formRef, isEdit, loading, validateStepOne, updateCampaign } = useCreateCampaign()
 const { createDraft, loadingDraft } = useCreateDraftCampaign()
 
@@ -12,6 +12,7 @@ const onNext = async () => {
   await validateStepOne(formRef.value)
   emit('next');
 }
+
 </script>
 
 <template>
@@ -80,15 +81,7 @@ const onNext = async () => {
     </VRow>
 
 
-    <div class="d-flex justify-space-between align-center mt-8 flex-wrap gap-4">
-
-      <!-- ESQUERDA -->
-      <div>
-        <VBtn v-if="isEdit" color="info" variant="tonal">
-          <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-          Voltar
-        </VBtn>
-      </div>
+    <div class="d-flex justify-end align-center mt-8 flex-wrap gap-4">
 
       <!-- DIREITA -->
       <div class="d-flex gap-4">

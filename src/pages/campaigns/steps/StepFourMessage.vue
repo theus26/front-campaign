@@ -11,7 +11,7 @@ import MessageComponent from '../components/message.vue';
 
 const { createDraft, loadingDraft } = useCreateDraftCampaign()
 
-const { campaignStore } = useCreateCampaign()
+const { campaignStore, isEdit, updateCampaign } = useCreateCampaign()
 const toast = useToast();
 const store = campaignStore
 const loading = ref(false)
@@ -105,10 +105,7 @@ const onCreate = async () => {
 }
 
 
-onMounted(() => {
-  console.log('store', store.getDraft);
 
-})
 </script>
 
 <template>
@@ -128,36 +125,62 @@ onMounted(() => {
         <MessageComponent />
       </VCol>
 
-      <VCol cols="12">
-        <div class="d-flex flex-wrap gap-4 justify-space-between mt-8">
-          <VBtn color="secondary" variant="tonal" @click="$emit('back')">
-            <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-            Voltar
-          </VBtn>
 
-          <div class="d-flex gap-4">
-            <VBtn color="secondary" variant="tonal" @click="createDraft" :loading="loadingDraft">
-              Salvar rascunho
-            </VBtn>
-
-            <VTooltip :disabled="canCreate">
-              <template #activator="{ props }">
-                <div v-bind="props">
-                  <VBtn type="submit" :disabled="!canCreate" :loading="loading">
-                    Criar campanha
-                  </VBtn>
-                </div>
-              </template>
-
-              <div v-if="validation.errors.length">
-                <div v-for="(err, i) in validation.errors" :key="i">
-                  • {{ err }}
-                </div>
-              </div>
-            </VTooltip>
-          </div>
-        </div>
-      </VCol>
     </VRow>
+
+    <div class="d-flex justify-space-between align-center mt-8 flex-wrap gap-4">
+
+      <!-- ESQUERDA -->
+      <div>
+        <VBtn color="info" variant="tonal" @click="$emit('back')">
+          <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
+          Voltar
+        </VBtn>
+      </div>
+
+      <!-- DIREITA -->
+      <div class="d-flex gap-4">
+
+
+        <VBtn v-if="!isEdit" color="info" variant="tonal" @click="createDraft" :loading="loadingDraft">
+          Salvar rascunho
+        </VBtn>
+
+        <VTooltip v-if="isEdit" :disabled="canCreate">
+          <template #activator="{ props }">
+            <div v-bind="props">
+              <VBtn color="primary" @click="updateCampaign" :disabled="!canCreate" :loading="loading">
+                Atualizar campanha
+              </VBtn>
+            </div>
+          </template>
+
+          <div v-if="validation.errors.length">
+            <div v-for="(err, i) in validation.errors" :key="i">
+              • {{ err }}
+            </div>
+          </div>
+        </VTooltip>
+
+        <VTooltip v-else :disabled="canCreate">
+          <template #activator="{ props }">
+            <div v-bind="props">
+              <VBtn type="submit" :disabled="!canCreate" :loading="loading">
+                Criar campanha
+              </VBtn>
+            </div>
+          </template>
+
+          <div v-if="validation.errors.length">
+            <div v-for="(err, i) in validation.errors" :key="i">
+              • {{ err }}
+            </div>
+          </div>
+        </VTooltip>
+
+
+      </div>
+
+    </div>
   </VForm>
 </template>

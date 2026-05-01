@@ -72,7 +72,7 @@ export function useCreateCampaign() {
       campaignId: null,
       name: obj.nameCampaign,
       numbers: obj.numbers || [],
-      messages: obj.messages || [],
+
       startCampaign: convertStringForDate(obj.dataStart),
       endCampaign: convertStringForDate(obj.dataEnd),
       startTime: obj.startTime,
@@ -237,6 +237,7 @@ export function useCreateCampaign() {
 
       numbers: shippingNumbers.value ?? campaign.value?.numbers,
       status: "Draft",
+      content: campaignStore.getDraft.messages ?? campaign.value?.content,
       providerId:
         campaignStore.getDraft.providerId ?? campaign.value?.providerId,
     };
@@ -247,7 +248,6 @@ export function useCreateCampaign() {
     try {
       const campaignId = String(route.params.id);
       const payload = updatePayload();
-      console.log(payload);
 
       await useCampaign.updateCampaign(campaignId, payload);
       $toast.success("Campanha atualizada com sucesso!");
@@ -273,9 +273,12 @@ export function useCreateCampaign() {
     shippingNumbers.value = data.numbers || [];
 
     // STEP THREE -
-
     campaignStore.setDraft({
       providerId: data.providerId,
+    });
+
+    campaignStore.setDraft({
+      messages: data.content || [],
     });
   };
 

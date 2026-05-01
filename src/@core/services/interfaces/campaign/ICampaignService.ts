@@ -79,6 +79,7 @@ export interface ICampaignFilter {
 export interface ICampaign {
   campaignId: string;
   name?: string;
+  content?: MessageData[];
   intervalRepeat?: string | null;
   recurrence?: Recurrence;
   startTime?: string;

@@ -151,8 +151,6 @@ watch(
     isOpen.value = val;
 
     if (val) {
-      console.log('watch');
-
       qrCodeBase64.value = props.base64 ?? "";
       expired.value = false;
       startTimer();

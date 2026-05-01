@@ -5,7 +5,9 @@ import { ChatMessage } from '@/plugins/fake-api/handlers/apps/chat/types'
 import { themes } from '@/plugins/vuetify/theme'
 import type { Messages } from '@/store/campaign'
 import { useCampaignStore } from '@/store/campaign'
+import { ActiveChat } from '@/views/apps/chat/useChat'
 import { useChatStore } from '@/views/apps/chat/useChatStore'
+import { useRoute } from "vue-router"
 import { useToast } from 'vue-toast-notification'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { useTheme } from 'vuetify'
@@ -18,7 +20,10 @@ definePage({
 // composables
 const $toast = useToast();
 const store = useChatStore()
+const { activeChat } = storeToRefs(store);
 const campaignStore = useCampaignStore();
+const route = useRoute();
+const isEdit = computed(() => !!route.params.id);
 // Perfect scrollbar
 const chatLogPS = ref()
 const MAX_FILE_SIZE_MB = 40;
@@ -27,6 +32,11 @@ const messages = ref<MessageData[]>([
     type: "text",
   },
 ]);
+
+
+
+
+
 const scrollToBottomInChatLog = () => {
   const scrollEl = chatLogPS.value.$el || chatLogPS.value
   scrollEl.scrollTop = scrollEl.scrollHeight
@@ -34,6 +44,10 @@ const scrollToBottomInChatLog = () => {
 
 // Search query
 const q = ref('')
+
+
+
+
 
 watch(
   q,
@@ -190,8 +204,97 @@ const setDraftOfCampaign = (message: Messages) => {
   });
 };
 
+const getFormattedCurrentTime = () => {
+  return new Date().toString();
+};
+
+const normalizeDraftMessages = (messages: any[] = []) => {
+
+  return messages.map((message) => ({
+    mediaType: message.type ?? message.mediaType ?? "text",
+    mediaUrl: message.media ?? message.mediaUrl ?? undefined,
+    feedback: {
+      isSent: true,
+      isDelivered: true,
+      isSeen: true,
+    },
+    message: message.message ?? "",
+    senderId: 11,
+    time: getFormattedCurrentTime(),
+  }));
+};
+
+const draftRawMessages =
+  campaignStore.getDraft?.messages ??
+  campaignStore.campaignDraft?.messages ??
+  [];
+
+const draftMessages = normalizeDraftMessages(draftRawMessages);
+
+const mergeUniqueMessages = (
+  originalMessages: any[] = [],
+  newMessages: any[] = [],
+) => {
+
+
+  return newMessages.map((newMsg, index) => {
+    const originalMsg = originalMessages[index];
+
+    if (!originalMsg) return newMsg;
+
+    const hasChanged =
+      originalMsg.message !== newMsg.message ||
+      originalMsg.mediaType !== newMsg.mediaType ||
+      originalMsg.mediaUrl !== newMsg.mediaUrl ||
+      originalMsg.senderId !== newMsg.senderId;
+
+    return hasChanged ? newMsg : originalMsg;
+  });
+};
+
+const fallbackChatData: ActiveChat = {
+  chat: {
+    id: 2,
+    userId: 1,
+    unseenMsgs: 0,
+    messages: draftMessages,
+  },
+  contact: {
+    id: 1,
+    fullName: "Gavin Griffith",
+    role: "Frontend Developer",
+    about:
+      "Cake pie jelly jelly beans. Marzipan lemon drops halvah cake. Pudding cookie lemon drops icing",
+    avatar: "/src/assets/images/avatars/avatar-5.png",
+    status: "offline",
+  },
+};
+
+const chatData = computed<ActiveChat>(() => {
+  if (activeChat.value) {
+    return {
+      ...activeChat.value,
+      chat: activeChat.value.chat
+        ? {
+          ...activeChat.value.chat,
+          messages: mergeUniqueMessages(
+            activeChat.value.chat.messages,
+            draftMessages,
+          ),
+        }
+        : activeChat.value.chat,
+    };
+  }
+
+  return fallbackChatData;
+});
+
 onMounted(async () => {
-  await store.getChat(1)
+  if (isEdit.value) {
+    store.activeChat = chatData.value;
+    return;
+  }
+  await store.getChat(1);
 })
 
 

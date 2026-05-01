@@ -108,7 +108,7 @@ const onNext = async () => {
 
       <!-- ESQUERDA -->
       <div>
-        <VBtn v-if="isEdit" color="info" variant="tonal">
+        <VBtn color="info" variant="tonal" @click="$emit('back')">
           <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
           Voltar
         </VBtn>
