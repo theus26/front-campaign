@@ -133,6 +133,7 @@ export function useContact() {
   };
 
   const salvarEdicao = async () => {
+    loading.value = true;
     if (!itemEditado.value?.id) return;
 
     const numeroLimpo = limparNumero(itemEditado.value.numero);
@@ -144,8 +145,11 @@ export function useContact() {
 
     try {
       await useContactComposable.updateContact(itemEditado.value.id, payload);
+      fecharEdicao();
     } catch (error) {
       console.error("Erro ao atualizar contato:", error);
+    } finally {
+      loading.value = false;
     }
   };
 
