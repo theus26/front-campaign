@@ -113,7 +113,7 @@ export function useContact() {
     itemEditado.value = {
       id: item.id,
       nome: item.nome,
-      numero: item.numero.replace(/\D/g, ""),
+      numero: item.numero,
     };
 
     exibirEdicao.value = true;
@@ -128,21 +128,24 @@ export function useContact() {
     exibirConfirmacaoDesativacao.value = true;
   };
 
-  const salvarEdicao = async () => {
-    loading.value = true;
-    try {
-      await useContactComposable.updateContact(
-        itemEditado.value.id ?? "",
-        itemEditado.value,
-      );
+  const limparNumero = (numero: string): string => {
+    return numero.replace(/\D/g, "");
+  };
 
-      toast.success("Contato atualizado com sucesso");
-      await loadContacts();
-      fecharEdicao();
+  const salvarEdicao = async () => {
+    if (!itemEditado.value?.id) return;
+
+    const numeroLimpo = limparNumero(itemEditado.value.numero);
+
+    const payload = {
+      ...itemEditado.value,
+      numero: numeroLimpo,
+    };
+
+    try {
+      await useContactComposable.updateContact(itemEditado.value.id, payload);
     } catch (error) {
-      console.error(error);
-    } finally {
-      loading.value = false;
+      console.error("Erro ao atualizar contato:", error);
     }
   };
 
