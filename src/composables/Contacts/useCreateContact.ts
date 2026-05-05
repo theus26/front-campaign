@@ -14,7 +14,7 @@ export function useCreateContact() {
 
   const buildPayload = (): ICriarContato => ({
     nome: nome.value.trim(),
-    numero: numero.value,
+    numero: numero.value.replace(/\D/g, ""),
   });
 
   const createContact = async () => {

@@ -39,18 +39,18 @@ export default class ContactService
     return response.data;
   }
   async updateContact(
-    contactId: string,
+    contatoId: string,
     data: IAtualizarContato,
   ): Promise<void> {
     await this.axiosIns.put(this.serviceContactConfig.updateContact, data, {
-      params: { contactId },
+      params: { contatoId },
     });
   }
-  async getContactById(contactId: string): Promise<IContatos> {
+  async getContactById(contatoId: string): Promise<IContatos> {
     const response = await this.axiosIns.get(
       this.serviceContactConfig.getContactById,
       {
-        params: { contactId },
+        params: { contatoId },
       },
     );
     return response.data;
@@ -64,9 +64,9 @@ export default class ContactService
     );
     return response.data;
   }
-  async deleteContact(contactId: string): Promise<void> {
+  async deleteContact(contatoId: string): Promise<void> {
     await this.axiosIns.delete(this.serviceContactConfig.deleteContact, {
-      params: { contactId },
+      params: { contatoId },
     });
   }
 }

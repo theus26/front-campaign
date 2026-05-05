@@ -19,7 +19,7 @@ export function useContact() {
   const exibirConfirmacaoDesativacao = ref(false);
   const exibirEdicao = ref(false);
   const itemEditado = ref({
-    id: null as string | null,
+    id: "",
     nome: "",
     numero: "",
   });
@@ -113,7 +113,7 @@ export function useContact() {
     itemEditado.value = {
       id: item.id,
       nome: item.nome,
-      numero: item.numero,
+      numero: item.numero.replace(/\D/g, ""),
     };
 
     exibirEdicao.value = true;
@@ -131,13 +131,13 @@ export function useContact() {
   const salvarEdicao = async () => {
     loading.value = true;
     try {
-      useContactComposable.updateContact(
+      await useContactComposable.updateContact(
         itemEditado.value.id ?? "",
         itemEditado.value,
       );
 
       toast.success("Contato atualizado com sucesso");
-      loadContacts();
+      await loadContacts();
       fecharEdicao();
     } catch (error) {
       console.error(error);
@@ -146,15 +146,15 @@ export function useContact() {
     }
   };
 
-  const deletarContact = () => {
+  const deletarContact = async () => {
     loading.value = true;
     try {
-      useContactComposable.deleteContact(itemEditado.value.id ?? "");
+      await useContactComposable.deleteContact(itemEditado.value.id ?? "");
       exibirSucesso.value = true;
-      loadContacts();
+      await loadContacts();
     } catch (e: any) {
       mensagemErro.value =
-        e?.response?.data?.error ?? "Erro ao desativar o órgão";
+        e?.response?.data?.error ?? "Erro ao remover contato";
       exibirCancelamento.value = true;
       console.error(e);
     } finally {
