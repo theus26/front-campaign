@@ -145,6 +145,7 @@ export function useContact() {
 
     try {
       await useContactComposable.updateContact(itemEditado.value.id, payload);
+      loadContacts;
       fecharEdicao();
     } catch (error) {
       console.error("Erro ao atualizar contato:", error);
