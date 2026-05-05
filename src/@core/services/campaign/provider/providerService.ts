@@ -10,6 +10,7 @@ import {
   IProviderFilter,
   IProviderGeneric,
   IProviderService,
+  ISyncContacts,
   IUpdateProvider,
 } from "../../interfaces/campaign/IProviderService";
 import { IPaginacao } from "../../interfaces/types";
@@ -33,6 +34,13 @@ export default class ProviderService
     this.useAuth = useAuth;
     this.axiosIns = axiosIns;
     this.useAuth.configureInterceptorsAxiosInstance(this.axiosIns);
+  }
+  async syncContacts(item: ISyncContacts): Promise<void> {
+    const response = await this.axiosIns.post(
+      this.serviceProviderConfig.syncContacts,
+      item,
+    );
+    return response.data;
   }
   async updateProvider(
     providerId: string,

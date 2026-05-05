@@ -1,20 +1,21 @@
 import {
-  IProviderFilter,
-  IProviderGeneric,
-} from "@/@core/services/interfaces/campaign/IProviderService";
+  IContatos,
+  IContatosFiltros,
+} from "@/@core/services/interfaces/contacts/IContactsService";
 
-import useProvider from "@/services/provider/useProvider";
+import useContact from "@/services/contacts/useContacts";
 
-export function useListProviderComposable(params: {
-  search: Ref<string>;
+export function useListContactComposable(params: {
+  nome: Ref<string>;
+  numero: Ref<string>;
   page: Ref<number>;
   itemsPerPage: Ref<number>;
 }) {
-  const { search, page, itemsPerPage } = params;
+  const { nome, numero, page, itemsPerPage } = params;
 
   const loading = ref(false);
   const erro = ref<string | null>(null);
-  const data = ref<IProviderGeneric[]>([]);
+  const data = ref<IContatos[]>([]);
   const totalRecords = ref(0);
 
   const fetch = async () => {
@@ -22,13 +23,14 @@ export function useListProviderComposable(params: {
       loading.value = true;
       erro.value = null;
 
-      const filtro: IProviderFilter = {
-        search: search.value.trim(),
-        page: page.value,
-        pageSize: itemsPerPage.value,
+      const filtro: IContatosFiltros = {
+        nome: nome.value.trim(),
+        numero: numero.value.trim(),
+        pagina: page.value,
+        tamanhoPagina: itemsPerPage.value,
       };
 
-      const response = await useProvider.getListProviders(filtro);
+      const response = await useContact.listContacts(filtro);
 
       data.value = response.data;
       totalRecords.value = response.totalRegister;
@@ -41,7 +43,7 @@ export function useListProviderComposable(params: {
     }
   };
 
-  watch([search, page, itemsPerPage], fetch, {
+  watch([nome, numero, page, itemsPerPage], fetch, {
     immediate: true,
   });
 

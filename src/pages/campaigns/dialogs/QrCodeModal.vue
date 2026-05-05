@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ISyncContacts } from "@/@core/services/interfaces/campaign/IProviderService";
 import useProvider from "@/services/provider/useProvider";
 import { CampaignDraft, useCampaignStore } from "@/store/campaign";
 import { onUnmounted, ref, watch } from "vue";
@@ -25,6 +26,7 @@ const expired = ref(false);
 let interval: any = null
 let qrTimeout: any = null
 let connectingTimeout: any = null
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 const startTimer = async () => {
   clearInterval(interval)
@@ -36,12 +38,16 @@ const startTimer = async () => {
   const providerId = state?.instance?.providerId
 
   if (status === "open") {
+    await syncContactsInBackground()
+
     connectionStatus.value = "connected"
     $toast.success("Dispositivo conectado com sucesso")
+
     campaignStore.setDraft({
       ...(campaignStore as unknown as CampaignDraft),
-      providerId: providerId ?? null
+      providerId: providerId ?? null,
     } as CampaignDraft)
+
     emit("next")
 
     return
@@ -80,6 +86,24 @@ const startTimer = async () => {
   }, 30000)
 }
 
+const syncContactsInBackground = async (): Promise<void> => {
+  const payload: ISyncContacts = {
+    nomeInstancia: props.name ?? "",
+  }
+
+  try {
+    $toast.info("Sincronização de contatos iniciada...")
+
+    await useProvider.syncContacts(payload)
+    await delay(5000)
+
+    $toast.success("Contatos sincronizados com sucesso!")
+  } catch (error) {
+    console.error("Erro ao sincronizar contatos:", error)
+    $toast.error("Erro ao sincronizar contatos")
+  }
+}
+
 const checkConnection = async () => {
   const state = await useProvider.getConnectionState(props.name)
 
@@ -109,6 +133,8 @@ const checkConnection = async () => {
   }
 
   if (status === "open") {
+    await syncContactsInBackground()
+
     const providerId = state.instance.providerId
     connectionStatus.value = "connected"
 
@@ -135,10 +161,7 @@ async function reloadQrCode() {
 
   try {
     const data = await useProvider.connectInstance(props.name);
-
-
     qrCodeBase64.value = data.code ?? data.pairingCode ?? data.base64 ?? "";
-
     startTimer();
   } finally {
     loading.value = false;

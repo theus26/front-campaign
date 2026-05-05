@@ -294,7 +294,7 @@ onMounted(async () => {
     store.activeChat = chatData.value;
     return;
   }
-  await store.getChat(1);
+  await store.getChat(1)
 })
 
 

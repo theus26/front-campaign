@@ -14,6 +14,7 @@ export interface IProviderService {
     filter: IProviderFilter,
   ): Promise<IPaginacao<IProviderGeneric>>;
   getConnectionState(instanceName: string): Promise<IConnectionState>;
+  syncContacts(item: ISyncContacts): Promise<void>;
 }
 
 export type IProviderConfig = {
@@ -24,6 +25,7 @@ export type IProviderConfig = {
   getListProviders: string;
   getConnectionState: string;
   updateProvider: string;
+  syncContacts: string;
 };
 
 export interface IProvider {
@@ -77,4 +79,8 @@ export interface IProviderFilter {
 
 export interface IUpdateProvider {
   name?: string;
+}
+
+export interface ISyncContacts {
+  nomeInstancia?: string;
 }

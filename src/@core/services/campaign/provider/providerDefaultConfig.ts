@@ -8,6 +8,7 @@ const defaultConfig: IProviderConfig = {
   getListProviders: "provider/GetProvidersByUserId",
   getConnectionState: "provider/getConnectionState",
   updateProvider: "provider/updateProvider",
+  syncContacts: "provider/SyncContacts"
 };
 
 export default defaultConfig;

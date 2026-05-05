@@ -43,6 +43,8 @@ export const useChatStore = defineStore("chat", {
     },
 
     async getChat(userId: ChatContact["id"]) {
+      console.log(userId);
+
       const res = await $api(`/apps/chat/chats/${userId}`);
       console.log(res);
 

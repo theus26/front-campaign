@@ -93,7 +93,8 @@ const {
       <VDivider class="mt-4" />
 
       <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:page="page" :headers="headers" :items="campaigns"
-        :items-length="totalRecords" :loading="loading" class="text-no-wrap" @update:options="updateOptions">
+        :items-length="totalRecords" loading-text="Carregando..." :loading="loading" class="text-no-wrap"
+        @update:options="updateOptions">
         <template #item.name="{ item }">
           <div class="d-flex align-center gap-x-4">
             <VAvatar size="38" rounded :style="{ backgroundColor: stringToColor(item.name || '') }">
@@ -124,13 +125,13 @@ const {
         <template #item.startDate="{ item }">
           <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ formatDate(item.startCampaign
             || null)
-          }}</span>
+            }}</span>
         </template>
 
         <template #item.endDate="{ item }">
           <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ formatDate(item.endCampaign ||
             null)
-          }}</span>
+            }}</span>
         </template>
 
         <template #item.status="{ item }">
