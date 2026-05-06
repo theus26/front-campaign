@@ -3,6 +3,7 @@ import type { VerticalNavItems } from "@layouts/types";
 import campaigns from "./campaigns";
 import contacts from "./contacts";
 import grupoContato from "./grupo-contato";
+import provider from "./provider";
 // import charts from "./charts";
 // import dashboard from "./dashboard";
 // import forms from "./forms";
@@ -18,4 +19,9 @@ import grupoContato from "./grupo-contato";
 //   ...others,
 //   ...campaigns,
 // ] as VerticalNavItems;
-export default [...campaigns, ...contacts, ...grupoContato] as VerticalNavItems;
+export default [
+  ...campaigns,
+  ...contacts,
+  ...provider,
+  ...grupoContato,
+] as VerticalNavItems;

@@ -1,6 +1,7 @@
 import {
   ICreateProvider,
   IProvider,
+  ISyncContacts,
   IUpdateProvider,
 } from "@/@core/services/interfaces/campaign/IProviderService";
 import useProvider from "@/services/provider/useProvider";
@@ -35,9 +36,19 @@ export function useProvidersManager() {
   const reconetingProviderDialog = ref(false);
 
   const headers = [
-    { title: "Caixa de saída", key: "product" },
-    { title: "Status", key: "status" },
-    { title: "Ações", key: "actions", sortable: false },
+    { title: "Caixa de saída", key: "product", sortable: false },
+    {
+      title: "Status",
+      key: "status",
+      sortable: false,
+      align: "center" as const,
+    },
+    {
+      title: "Ações",
+      key: "actions",
+      sortable: false,
+      align: "center" as const,
+    },
   ];
 
   const {
@@ -157,6 +168,22 @@ export function useProvidersManager() {
     }
   };
 
+  const syncContactsInBackground = async (name: string) => {
+    const payload: ISyncContacts = {
+      nomeInstancia: name ?? "",
+    };
+
+    try {
+      toast.info("Sincronização de contatos iniciada...");
+
+      await useProvider.syncContacts(payload);
+      toast.success("Contatos sincronizados com sucesso!");
+    } catch (error) {
+      console.error("Erro ao sincronizar contatos:", error);
+      toast.error("Erro ao sincronizar contatos");
+    }
+  };
+
   const updateOptions = (options: any) => {
     if (options.page) page.value = options.page;
     if (options.itemsPerPage) itemsPerPage.value = options.itemsPerPage;
@@ -209,6 +236,10 @@ export function useProvidersManager() {
     },
   );
 
+  watchEffect(() => {
+    console.log(searchQuery.value);
+  });
+
   onMounted(async () => {
     await loadProviders();
   });
@@ -249,5 +280,6 @@ export function useProvidersManager() {
     updateOptions,
     resolveStatus,
     createNewProvider,
+    syncContactsInBackground,
   };
 }

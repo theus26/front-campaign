@@ -6,8 +6,6 @@ const { data, itemsPerPage, loading, page, nome, numero, totalRecords, headers, 
 
 <template>
   <div>
-
-
     <VCard title="Contatos" subtitle="Lista de contatos sincronizado" class="mb-6">
       <VDivider />
 

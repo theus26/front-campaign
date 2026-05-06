@@ -72,7 +72,7 @@ export interface Instance {
 
 export interface IProviderFilter {
   userId?: string;
-  search?: string | null;
+  name?: string | null;
   page?: number;
   pageSize?: number;
 }

@@ -21,9 +21,10 @@ export function useListProviderComposable(params: {
     try {
       loading.value = true;
       erro.value = null;
+      console.log(search.value);
 
       const filtro: IProviderFilter = {
-        search: search.value.trim(),
+        name: search.value.trim(),
         page: page.value,
         pageSize: itemsPerPage.value,
       };

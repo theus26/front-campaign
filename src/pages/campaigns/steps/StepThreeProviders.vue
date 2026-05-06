@@ -46,7 +46,7 @@ const {
   createNewProvider,
   loadProviders,
   createProvider,
-
+  syncContactsInBackground,
 } = useProvidersManager()
 
 const { validateStepThree, updateCampaign, isEdit } = useCreateCampaign()
@@ -152,6 +152,10 @@ const onNext = async () => {
                   <template v-else>
                     <VListItem value="disconnect" prepend-icon="tabler-refresh-off" @click="openDisconnectDialog(item)">
                       Desconectar
+                    </VListItem>
+                    <VListItem value="sync" prepend-icon="tabler-refresh"
+                      @click="syncContactsInBackground(item.instanceName)">
+                      Sincronizar Contatos
                     </VListItem>
                   </template>
                 </VList>

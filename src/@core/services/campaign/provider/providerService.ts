@@ -36,11 +36,7 @@ export default class ProviderService
     this.useAuth.configureInterceptorsAxiosInstance(this.axiosIns);
   }
   async syncContacts(item: ISyncContacts): Promise<void> {
-    const response = await this.axiosIns.post(
-      this.serviceProviderConfig.syncContacts,
-      item,
-    );
-    return response.data;
+    await this.axiosIns.post(this.serviceProviderConfig.syncContacts, item);
   }
   async updateProvider(
     providerId: string,
@@ -75,6 +71,8 @@ export default class ProviderService
   async getListProviders(
     filter: IProviderFilter,
   ): Promise<IPaginacao<IProviderGeneric>> {
+    console.log(filter);
+
     const providers = await this.axiosIns.get(
       this.serviceProviderConfig.getListProviders,
       { params: filter },

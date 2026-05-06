@@ -289,12 +289,40 @@ const chatData = computed<ActiveChat>(() => {
   return fallbackChatData;
 });
 
+const mockData: ActiveChat = {
+  chat: {
+    id: 2,
+    userId: 1,
+    unseenMsgs: 0,
+    messages: [
+      // {
+      //   mediaType: undefined,
+      //   mediaUrl: undefined,
+      //   feedback: { isSent: false, isDelivered: false, isSeen: false },
+      //   message: '',
+      //   senderId: 11,
+      //   time: ''
+      // }
+    ]
+  },
+  contact: {
+    id: 1,
+    fullName: 'Gavin Griffith',
+    role: 'Frontend Developer',
+    about:
+      'Cake pie jelly jelly beans. Marzipan lemon drops halvah cake. Pudding cookie lemon drops icing',
+    avatar: '/src/assets/images/avatars/avatar-5.png',
+    status: 'offline'
+  }
+}
+
 onMounted(async () => {
   if (isEdit.value) {
     store.activeChat = chatData.value;
     return;
   }
-  await store.getChat(1)
+
+  store.activeChat = mockData;
 })
 
 

@@ -24,11 +24,11 @@ export function useCreateContact() {
       const payload = buildPayload();
       await useContact.createContact(payload);
 
-      toast.success("Indicante criado com sucesso!");
+      toast.success("Contato criado com sucesso!");
       router.push("/contatos/list");
     } catch (error: any) {
       const message =
-        error?.response?.data?.error ?? "Erro inesperado ao criar indicante";
+        error?.response?.data?.error ?? "Erro inesperado ao criar contato";
       console.error(message);
       toast.error(message);
     } finally {

@@ -1,12 +1,12 @@
 export default [
-  { heading: "Gestão de Campanhas" },
+  { heading: "Campanhas" },
   {
-    title: "Criar Nova Campanha",
+    title: "Criar Campanha",
     icon: { icon: "tabler-plus" },
     to: "campaigns-create",
   },
   {
-    title: "Histórico de Campanhas",
+    title: "Listar Campanhas",
     icon: { icon: "tabler-history" },
     to: "campaigns-list",
   },
