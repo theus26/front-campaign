@@ -35,7 +35,7 @@ export function useCreateCampaign() {
   const campaign = ref<ICampaign | null>(null);
   const fileName = ref("");
   const shippingNumbers = ref<string[]>([]);
-  const selectedContacts = ref<"manual" | "import">("manual");
+  const selectedContacts = ref<"import" | "contatos" | "grupos">("import");
   const message = ref("");
   const showSuccessDialogDesconectar = ref(false);
   const showSuccessDialogExcluir = ref(false);

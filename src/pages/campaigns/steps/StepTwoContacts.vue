@@ -28,10 +28,10 @@ const onNext = async () => {
 
       <VCol cols="12">
         <CustomRadios v-model:selected-radio="selectedContacts" :radio-content="typeContacts"
-          :grid-column="{ sm: '6', cols: '12' }" />
+          :grid-column="{ cols: '12', md: '4' }" />
       </VCol>
 
-      <VCol cols="12" v-if="selectedContacts === 'manual'">
+      <!-- <VCol cols="12" v-if="selectedContacts === 'manual'">
         <AppTextField v-model="message" clearable label="Adicione os números manualmente" placeholder="Ex: 559999999999"
           type="text">
           <template #append-inner>
@@ -39,18 +39,18 @@ const onNext = async () => {
               <VProgressCircular v-if="loading" width="3" size="24" indeterminate />
             </VFadeTransition>
           </template>
-          <template #append>
+<template #append>
             <VBtn :disabled="message.length < 2" color="primary" @click="addNumber">Adicionar</VBtn>
           </template>
-        </AppTextField>
+</AppTextField>
 
-        <VExpandTransition>
-          <div v-if="shippingNumbers.length" class="mt-6">
-            <p class="text-sm text-gray-400 mb-2 font-medium">Números adicionados</p>
-            <NumbersPreview :numbers="shippingNumbers" :onDelete="deleteNumber" />
-          </div>
-        </VExpandTransition>
-      </VCol>
+<VExpandTransition>
+  <div v-if="shippingNumbers.length" class="mt-6">
+    <p class="text-sm text-gray-400 mb-2 font-medium">Números adicionados</p>
+    <NumbersPreview :numbers="shippingNumbers" :onDelete="deleteNumber" />
+  </div>
+</VExpandTransition>
+</VCol> -->
 
       <VCol cols="12" v-if="selectedContacts === 'import'">
         <div class="upload-container">

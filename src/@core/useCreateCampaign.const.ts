@@ -26,10 +26,20 @@ export const radioContent = [
 ];
 
 export const typeContacts = [
+  // {
+  //   title: "Adicione os números de forma manual",
+  //   desc: "Digite os números desejados manualmente para incluir novos contatos no chat.",
+  //   value: "manual",
+  // },
   {
-    title: "Adicione os números de forma manual",
-    desc: "Digite os números desejados manualmente para incluir novos contatos no chat.",
-    value: "manual",
+    title: "Selecionar contatos",
+    value: "contatos",
+    desc: "Escolha contatos individuais ou grupos já cadastrados para adicionar participantes rapidamente.",
+  },
+  {
+    title: "Selecionar grupos",
+    value: "grupos",
+    desc: "Adicione participantes utilizando grupos de contatos já criados e organizados.",
   },
   {
     title: "Importar planilhas",
