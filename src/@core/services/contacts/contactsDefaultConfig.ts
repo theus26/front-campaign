@@ -6,5 +6,6 @@ const defaultConfig: IContactConfig = {
   deleteContact: "/Contato/RemoverContato",
   getContactById: "/Contato/ObterContatoPorId",
   getListContacts: "/Contato/ListarContatos",
+  getListaAllContacts: "/Contato/ListarContatosSemPaginacao",
 };
 export default defaultConfig;

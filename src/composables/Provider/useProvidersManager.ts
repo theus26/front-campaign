@@ -236,10 +236,6 @@ export function useProvidersManager() {
     },
   );
 
-  watchEffect(() => {
-    console.log(searchQuery.value);
-  });
-
   onMounted(async () => {
     await loadProviders();
   });

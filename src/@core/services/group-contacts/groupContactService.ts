@@ -39,24 +39,22 @@ export default class GroupContactService
     return response.data;
   }
   async updateGroupContact(
-    groupContactId: string,
+    grupoId: string,
     data: IAtualizarGrupoContato,
   ): Promise<void> {
     await this.axiosIns.put(
       this.serviceGroupContactConfig.updateGroupContact,
       data,
       {
-        params: { groupContactId },
+        params: { grupoId },
       },
     );
   }
-  async getGroupContactById(
-    groupContactId: string,
-  ): Promise<IGruposContatosDto> {
+  async getGroupContactById(grupoId: string): Promise<IGruposContatosDto> {
     const response = await this.axiosIns.get(
       this.serviceGroupContactConfig.getGroupContactById,
       {
-        params: { groupContactId },
+        params: { grupoId },
       },
     );
     return response.data;
@@ -72,11 +70,11 @@ export default class GroupContactService
     );
     return response.data;
   }
-  async deleteGroupContact(groupContactId: string): Promise<void> {
+  async deleteGroupContact(grupoId: string): Promise<void> {
     await this.axiosIns.delete(
       this.serviceGroupContactConfig.deleteGroupContact,
       {
-        params: { groupContactId },
+        params: { grupoId },
       },
     );
   }

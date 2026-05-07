@@ -4,9 +4,11 @@ import { IAuthService } from "../interfaces/auth/IAuthService";
 import {
   IAtualizarContato,
   IContactConfig,
+  IContactsAll,
   IContactsService,
   IContatos,
   IContatosFiltros,
+  IContatosFiltrosSemPaginacaoDto,
   ICriarContato,
 } from "../interfaces/contacts/IContactsService";
 import { IPaginacao } from "../interfaces/types";
@@ -30,6 +32,17 @@ export default class ContactService
     this.useAuth = useAuth;
     this.axiosIns = axiosIns;
     this.useAuth.configureInterceptorsAxiosInstance(this.axiosIns);
+  }
+  async getListaAllContacts(
+    filter: IContatosFiltrosSemPaginacaoDto,
+  ): Promise<IContactsAll[]> {
+    const response = await this.axiosIns.get(
+      this.serviceContactConfig.getListaAllContacts,
+      {
+        params: filter,
+      },
+    );
+    return response.data;
   }
   async createContact(data: ICriarContato): Promise<void> {
     const response = await this.axiosIns.post(

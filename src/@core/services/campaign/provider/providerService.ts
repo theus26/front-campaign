@@ -71,8 +71,6 @@ export default class ProviderService
   async getListProviders(
     filter: IProviderFilter,
   ): Promise<IPaginacao<IProviderGeneric>> {
-    console.log(filter);
-
     const providers = await this.axiosIns.get(
       this.serviceProviderConfig.getListProviders,
       { params: filter },

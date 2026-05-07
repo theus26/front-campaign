@@ -121,7 +121,6 @@ export function useCreateCampaign() {
     await item?.validate().then((valid: any) => {
       if (valid.valid) {
         currentStep.value++;
-        console.log(item);
 
         isCurrentStepValid.value = true;
       } else {

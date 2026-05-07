@@ -1,11 +1,8 @@
 import useContactComposable from "@/services/contacts/useContacts";
-import { useToast } from "vue-toast-notification";
 import { formatInputNumber } from "./useFormatNumberComposable";
 import { useListContactComposable } from "./useListContact";
 
 export function useContact() {
-  const toast = useToast();
-
   const nome = ref("");
   const numero = ref("");
   const mensagemErro = ref("");

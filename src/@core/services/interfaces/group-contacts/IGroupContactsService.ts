@@ -12,6 +12,7 @@ export interface IGroupContactsService {
   getListGroupContacts(
     filter: IGruposFiltros,
   ): Promise<IPaginacao<IGruposContatosDto>>;
+
   deleteGroupContact(groupContactId: string): Promise<void>;
 }
 
@@ -42,7 +43,11 @@ export interface IGruposFiltros {
 export interface IGruposContatosDto {
   grupoId: string;
   nome: string;
-  numeros: string[];
+  contatosGrupoDto: IContatosGrupoDto[];
   dataCriacao: string;
   dataAtualizacao?: string;
+}
+export interface IContatosGrupoDto {
+  nome: string;
+  numero: string;
 }

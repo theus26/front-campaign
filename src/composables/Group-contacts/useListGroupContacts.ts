@@ -1,20 +1,17 @@
 import {
-  IProviderFilter,
-  IProviderGeneric,
-} from "@/@core/services/interfaces/campaign/IProviderService";
-
-import useProvider from "@/services/provider/useProvider";
-
-export function useListProviderComposable(params: {
-  search: Ref<string>;
+  IGruposContatosDto,
+  IGruposFiltros,
+} from "@/@core/services/interfaces/group-contacts/IGroupContactsService";
+import useGroupContact from "@/services/group-contacts/useGroupContact";
+export function useListGroupContact(params: {
+  nome: Ref<string>;
   page: Ref<number>;
   itemsPerPage: Ref<number>;
 }) {
-  const { search, page, itemsPerPage } = params;
-
+  const { nome, page, itemsPerPage } = params;
   const loading = ref(false);
   const erro = ref<string | null>(null);
-  const data = ref<IProviderGeneric[]>([]);
+  const data = ref<IGruposContatosDto[]>([]);
   const totalRecords = ref(0);
 
   const fetch = async () => {
@@ -22,13 +19,13 @@ export function useListProviderComposable(params: {
       loading.value = true;
       erro.value = null;
 
-      const filtro: IProviderFilter = {
-        name: search.value.trim(),
-        page: page.value,
-        pageSize: itemsPerPage.value,
+      const filtro: IGruposFiltros = {
+        nome: nome.value.trim(),
+        pagina: page.value,
+        tamanhoPagina: itemsPerPage.value,
       };
 
-      const response = await useProvider.getListProviders(filtro);
+      const response = await useGroupContact.getListGroupContacts(filtro);
 
       data.value = response.data;
       totalRecords.value = response.totalRegister;
@@ -41,7 +38,7 @@ export function useListProviderComposable(params: {
     }
   };
 
-  watch([search, page, itemsPerPage], fetch, {
+  watch([nome, page, itemsPerPage], fetch, {
     immediate: true,
   });
 

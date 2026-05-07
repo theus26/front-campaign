@@ -6,6 +6,9 @@ export interface IContactsService {
   updateContact(contactId: string, data: IAtualizarContato): Promise<void>;
   getContactById(contactId: string): Promise<IContatos>;
   listContacts(filter: IContatosFiltros): Promise<IPaginacao<IContatos>>;
+  getListaAllContacts(
+    filter: IContatosFiltrosSemPaginacaoDto,
+  ): Promise<IContactsAll[]>;
   deleteContact(contactId: string): Promise<void>;
 }
 
@@ -15,6 +18,7 @@ export type IContactConfig = {
   deleteContact: string;
   getContactById: string;
   getListContacts: string;
+  getListaAllContacts: string;
 };
 
 export interface ICriarContato {
@@ -38,3 +42,10 @@ export interface IContatos {
   nome?: string;
   fotoPerfil?: string;
 }
+
+export interface IContactsAll {
+  nome?: string;
+  numero?: string;
+}
+
+export interface IContatosFiltrosSemPaginacaoDto extends IContactsAll {}

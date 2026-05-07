@@ -1,5 +1,10 @@
+import {
+  IContactsAll,
+  IContatosFiltrosSemPaginacaoDto,
+} from "@/@core/services/interfaces/contacts/IContactsService";
 import { ICriarGrupoContato } from "@/@core/services/interfaces/group-contacts/IGroupContactsService";
 import { router } from "@/plugins/1.router";
+import useContacts from "@/services/contacts/useContacts";
 import useGroupContact from "@/services/group-contacts/useGroupContact";
 import { useToast } from "vue-toast-notification";
 import { VForm } from "vuetify/components";
@@ -10,15 +15,8 @@ export function useCreateGroupContact() {
   const formRef = ref<VForm>();
   const nome = ref("");
   const numeros = ref<string[]>([]);
+  const contatos = ref<IContactsAll[]>([]);
   const loading = ref(false);
-
-  const mock = [
-    { id: "1", nome: "João Silva", numero: "79999991111" },
-    { id: "2", nome: "Maria Souza", numero: "79988882222" },
-    { id: "3", nome: "Carlos Lima", numero: "79977773333" },
-    { id: "4", nome: "Ana Oliveira", numero: "79966664444" },
-    { id: "5", nome: "Pedro Santos", numero: "79955555555" },
-  ];
 
   const buildPayload = (): ICriarGrupoContato => ({
     nome: nome.value.trim(),
@@ -36,8 +34,7 @@ export function useCreateGroupContact() {
       router.push("/grupo-contato/list");
     } catch (error: any) {
       const message =
-        error?.response?.data?.error ??
-        "Erro inesperado ao criar grupo contato";
+        error?.response?.data?.erro ?? "Erro inesperado ao criar grupo contato";
       console.error(message);
       toast.error(message);
     } finally {
@@ -45,8 +42,25 @@ export function useCreateGroupContact() {
     }
   };
 
-  const customFilter = (_: any, query: string, item: any) =>
-    item.raw.nome.toLowerCase().includes(query.toLowerCase());
+  const customFilter = (_: any, query: string, item: any) => {
+    const search = query.toLowerCase().trim();
+
+    const nome = item.raw.nome?.toLowerCase() || "";
+    const numero = item.raw.numero?.toString().toLowerCase() || "";
+
+    return nome.includes(search) || numero.includes(search);
+  };
+
+  const getInitials = (nome: string) => {
+    if (!nome) return "G";
+
+    return nome
+      .split(" ")
+      .slice(0, 2)
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
 
   const submit = () => {
     formRef.value?.validate().then(({ valid }) => {
@@ -54,13 +68,29 @@ export function useCreateGroupContact() {
     });
   };
 
+  const listAllContatcts = async () => {
+    try {
+      const filter: IContatosFiltrosSemPaginacaoDto = {};
+      const data = await useContacts.getListaAllContacts(filter);
+
+      contatos.value = data;
+    } catch (error: any) {
+      console.error("Erro ao buscar contatos:", error);
+    }
+  };
+
+  onMounted(async () => {
+    await listAllContatcts();
+  });
+
   return {
     formRef,
     nome,
     numeros,
     loading,
-    mock,
+    contatos,
     submit,
     customFilter,
+    getInitials,
   };
 }
