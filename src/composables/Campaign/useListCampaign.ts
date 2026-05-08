@@ -24,7 +24,6 @@ export function useListCampaign(params: {
       erro.value = null;
 
       const filtro: ICampaignFilter = {
-        accountId: "d58900cc-9f9b-47ab-9e0f-84c69697da78",
         name: search.value.trim(),
         status: status.value,
         recurrence: recurring.value,

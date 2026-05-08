@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Contato } from '@/@core/services/interfaces/campaign/ICampaignService';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -13,8 +14,20 @@ const search = ref('')
 
 const LIMIT = 50
 
+const isContato = (item: unknown): item is Contato => {
+  return typeof item === "object" && item !== null && "numero" in item;
+};
+
+const normalizarNumeros = (contatos: Array<string | Contato>): string[] => {
+  return contatos.map((item) => (isContato(item) ? item.numero : item));
+}
+
 const filteredNumbers = computed(() => {
-  if (!search.value) return props.numbers
+  if (!search.value) {
+    console.log(normalizarNumeros(props.numbers));
+    return normalizarNumeros(props.numbers)
+  }
+
 
   return props.numbers.filter(n =>
     n.includes(search.value)
@@ -46,10 +59,6 @@ const visibleNumbers = computed(() => {
     <!-- EXPANSÃO -->
     <VExpandTransition>
       <div v-if="showNumbers">
-
-        <!-- BUSCA -->
-        <AppTextField v-model="search" placeholder="Buscar número..." density="compact"
-          class="mb-5 mt-3 me-3 flex-input" prepend-inner-icon="tabler-search" clearable />
 
         <!-- LISTA -->
         <div class="numbers-container">

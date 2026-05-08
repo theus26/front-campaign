@@ -261,6 +261,7 @@ export function useCampaignList() {
 
     try {
       const updatePayload = mapCampaignToUpdate(item, newStatus);
+
       await useCampaign.updateCampaign(item.campaignId, updatePayload);
       toast.success(
         `Campanha ${item.name} atualizada para ${resolveStatus(newStatus).label}`,

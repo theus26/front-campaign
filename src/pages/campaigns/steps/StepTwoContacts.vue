@@ -2,11 +2,12 @@
 import { typeContacts } from '@/@core/useCreateCampaign.const';
 import { useCreateCampaign } from '@/composables/Campaign/useCreateCampaign';
 import { useCreateDraftCampaign } from "@/composables/Campaign/useCreateDraftCampaign";
+import { formatInputNumber } from '@/composables/Contacts/useFormatNumberComposable';
 import { VForm } from 'vuetify/components';
 import NumbersPreview from '../components/NumbersPreview.vue';
 
 const emit = defineEmits(['next', 'back']);
-const { shippingNumbers, selectedContacts, message, loading, fileName, fileInput, formRef, isEdit, addNumber, deleteNumber, handleFileUpload, validateStepTwo, updateCampaign } = useCreateCampaign()
+const { shippingNumbers, contatos, numeros, selectedContacts, message, loading, fileName, fileInput, formRef, isEdit, addNumber, deleteNumber, handleFileUpload, validateStepTwo, updateCampaign, customFilter, getInitials } = useCreateCampaign()
 const { createDraft, loadingDraft } = useCreateDraftCampaign()
 
 
@@ -31,26 +32,41 @@ const onNext = async () => {
           :grid-column="{ cols: '12', md: '4' }" />
       </VCol>
 
-      <!-- <VCol cols="12" v-if="selectedContacts === 'manual'">
-        <AppTextField v-model="message" clearable label="Adicione os números manualmente" placeholder="Ex: 559999999999"
-          type="text">
-          <template #append-inner>
-            <VFadeTransition leave-absolute>
-              <VProgressCircular v-if="loading" width="3" size="24" indeterminate />
-            </VFadeTransition>
-          </template>
-<template #append>
-            <VBtn :disabled="message.length < 2" color="primary" @click="addNumber">Adicionar</VBtn>
-          </template>
-</AppTextField>
+      <VCol cols="12" v-if="selectedContacts === 'contatos'">
+        <VCol cols="12">
 
-<VExpandTransition>
-  <div v-if="shippingNumbers.length" class="mt-6">
-    <p class="text-sm text-gray-400 mb-2 font-medium">Números adicionados</p>
-    <NumbersPreview :numbers="shippingNumbers" :onDelete="deleteNumber" />
-  </div>
-</VExpandTransition>
-</VCol> -->
+
+          <AppAutocomplete v-model="shippingNumbers" label="Selecione os contatos" placeholder="Selecione"
+            :items="contatos" item-title="nome" item-value="numero" :custom-filter="customFilter" multiple chips
+            closable-chips clearable :return-object="false" prepend-inner-icon="tabler-users">
+            <!-- Item da lista -->
+            <template #item="{ props, item }">
+              <VListItem v-bind="props" :title="item.raw.nome" :subtitle="formatInputNumber(item.raw.numero)">
+                <template #prepend>
+                  <VAvatar size="32" color="primary" variant="tonal">
+                    {{ getInitials(item.raw.nome) }}
+                  </VAvatar>
+                </template>
+              </VListItem>
+            </template>
+
+            <!-- Chips selecionados -->
+            <template #chip="{ props, item }">
+              <VChip v-bind="props" size="small" :color="item.raw.nome ? 'primary' : 'warning'" variant="tonal">
+                {{ item.raw.nome ?? "Sem nome" }}
+              </VChip>
+            </template>
+          </AppAutocomplete>
+
+        </VCol>
+
+        <VExpandTransition>
+          <div v-if="shippingNumbers.length" class="mt-6">
+            <p class="text-sm text-gray-400 mb-2 font-medium">Números adicionados</p>
+            <NumbersPreview :numbers="shippingNumbers" :onDelete="deleteNumber" />
+          </div>
+        </VExpandTransition>
+      </VCol>
 
       <VCol cols="12" v-if="selectedContacts === 'import'">
         <div class="upload-container">

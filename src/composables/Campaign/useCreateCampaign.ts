@@ -2,8 +2,13 @@ import {
   ICampaign,
   IUpdateCampaign,
 } from "@/@core/services/interfaces/campaign/ICampaignService";
+import {
+  IContactsAll,
+  IContatosFiltrosSemPaginacaoDto,
+} from "@/@core/services/interfaces/contacts/IContactsService";
 import { router } from "@/plugins/1.router";
 import useCampaign from "@/services/campaign/useCampaign";
+import useContacts from "@/services/contacts/useContacts";
 import { useCampaignStore } from "@/store/campaign";
 import { useRoute } from "vue-router";
 import { useToast } from "vue-toast-notification";
@@ -20,6 +25,9 @@ export function useCreateCampaign() {
   const loading = ref(false);
   const isCurrentStepValid = ref(true);
   const currentStep = ref(0);
+
+  const numeros = ref<string[]>([]);
+  const contatos = ref<IContactsAll[]>([]);
 
   const stepOneForm = reactive({
     nameCampaign: "",
@@ -48,6 +56,26 @@ export function useCreateCampaign() {
     return d.toISOString();
   };
 
+  const customFilter = (_: any, query: string, item: any) => {
+    const search = query.toLowerCase().trim();
+
+    const nome = item.raw.nome?.toLowerCase() || "";
+    const numero = item.raw.numero?.toString().toLowerCase() || "";
+
+    return nome.includes(search) || numero.includes(search);
+  };
+
+  const getInitials = (nome: string) => {
+    if (!nome) return "G";
+
+    return nome
+      .split(" ")
+      .slice(0, 2)
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
   const validateTime = (startTime: string, endTime: string) => {
     const time1 = new Date(`1970-01-01T${startTime}:00Z`);
     const time2 = new Date(`1970-01-01T${endTime}:00Z`);
@@ -71,7 +99,6 @@ export function useCreateCampaign() {
     return {
       campaignId: null,
       name: obj.nameCampaign,
-      numbers: obj.numbers || [],
 
       startCampaign: convertStringForDate(obj.dataStart),
       endCampaign: convertStringForDate(obj.dataEnd),
@@ -237,7 +264,7 @@ export function useCreateCampaign() {
         stepOneForm.intervalRepeat ?? campaign.value?.intervalRepeat,
 
       numbers: shippingNumbers.value ?? campaign.value?.numbers,
-      status: "Draft",
+      status: campaign.value?.status ?? "draft",
       content: campaignStore.getDraft.messages ?? campaign.value?.content,
       providerId:
         campaignStore.getDraft.providerId ?? campaign.value?.providerId,
@@ -271,6 +298,7 @@ export function useCreateCampaign() {
     stepOneForm.startTime = data.startTime;
     stepOneForm.endTime = data.timeEnd;
     // STEP TWO
+
     shippingNumbers.value = data.numbers || [];
 
     // STEP THREE -
@@ -286,8 +314,10 @@ export function useCreateCampaign() {
   watch(
     stepOneForm,
     (newVal) => {
-      const campaign = getDetailCampaign(newVal);
-      campaignStore.setDraft(campaign);
+      if (newVal.nameCampaign) {
+        const campaign = getDetailCampaign(newVal);
+        campaignStore.setDraft(campaign);
+      }
     },
     { deep: true, immediate: true },
   );
@@ -300,9 +330,16 @@ export function useCreateCampaign() {
     { deep: true },
   );
 
-  watch(selectedContacts, (newVal) => {
-    campaignStore.setDraft({ recurrence: newVal });
-  });
+  const listAllContatcts = async () => {
+    try {
+      const filter: IContatosFiltrosSemPaginacaoDto = {};
+      const data = await useContacts.getListaAllContacts(filter);
+
+      contatos.value = data;
+    } catch (error: any) {
+      console.error("Erro ao buscar contatos:", error);
+    }
+  };
 
   onMounted(async () => {
     if (isEdit.value) {
@@ -311,6 +348,7 @@ export function useCreateCampaign() {
       );
       fillCampaign(campaign.value);
     }
+    await listAllContatcts();
   });
 
   return {
@@ -329,8 +367,11 @@ export function useCreateCampaign() {
     isEdit,
     // step2
     shippingNumbers,
+    contatos,
+    numeros,
     selectedContacts,
     message,
+    customFilter,
     addNumber,
     deleteNumber,
     fileInput,
@@ -341,6 +382,7 @@ export function useCreateCampaign() {
     showCancelDialog,
 
     handleCancel,
+    getInitials,
     // store
     campaignStore,
   };

@@ -92,3 +92,8 @@ export interface ICampaign {
   endCampaign?: string;
   providerId?: string;
 }
+
+export type Contato = {
+  numero: string
+  nome: string
+}
