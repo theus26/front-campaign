@@ -31,6 +31,12 @@ export default class GroupContactService
     this.axiosIns = axiosIns;
     this.useAuth.configureInterceptorsAxiosInstance(this.axiosIns);
   }
+  async getListAllGroupContacts(): Promise<IGruposContatosDto[]> {
+    const response = await this.axiosIns.get(
+      this.serviceGroupContactConfig.getListAllGroupContacts,
+    );
+    return response.data;
+  }
   async createGroupContact(data: ICriarGrupoContato): Promise<void> {
     const response = await this.axiosIns.post(
       this.serviceGroupContactConfig.createGroupContact,

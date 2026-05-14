@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Contato } from '@/@core/services/interfaces/campaign/ICampaignService';
+import { Contato, GrupoContato } from '@/@core/services/interfaces/campaign/ICampaignService';
 import { computed, ref } from 'vue';
 
 interface Props {
   numbers: string[]
   onDelete?: (value: string) => void
 }
+
 
 const props = defineProps<Props>()
 
@@ -14,40 +15,85 @@ const search = ref('')
 
 const LIMIT = 50
 
-const isContato = (item: unknown): item is Contato => {
-  return typeof item === "object" && item !== null && "numero" in item;
+const isGrupo = (item: unknown): item is GrupoContato => {
+  return (
+    typeof item === "object" &&
+    item !== null &&
+    "grupoId" in item &&
+    "contatosGrupoDto" in item
+  );
 };
 
-const normalizarNumeros = (contatos: Array<string | Contato>): string[] => {
-  return contatos.map((item) => (isContato(item) ? item.numero : item));
-}
+const isContato = (item: unknown): item is Contato => {
+  return (
+    typeof item === "object" &&
+    item !== null &&
+    "numero" in item
+  );
+};
+
+const isString = (item: unknown): item is string => {
+  return typeof item === "string";
+};
+
+const normalizarNumeros = (
+  items: Array<string | Contato | GrupoContato>,
+): string[] => {
+  return [
+    ...new Set(
+      items.flatMap((item) => {
+        // Grupo
+        if (isGrupo(item)) {
+          return item.contatosGrupoDto.map(c => c.numero);
+        }
+
+        // Contato
+        if (isContato(item)) {
+          return item.numero;
+        }
+
+        // String
+        if (isString(item)) {
+          return item;
+        }
+
+        return [];
+      }),
+    ),
+  ];
+};
 
 const filteredNumbers = computed(() => {
+  const numeros = normalizarNumeros(props.numbers);
+
   if (!search.value) {
-    console.log(normalizarNumeros(props.numbers));
-    return normalizarNumeros(props.numbers)
+    return numeros;
   }
 
-
-  return props.numbers.filter(n =>
-    n.includes(search.value)
-  )
-})
+  return numeros.filter(numero =>
+    numero.includes(search.value),
+  );
+});
 
 const visibleNumbers = computed(() => {
   return filteredNumbers.value.slice(0, LIMIT)
 })
+
+
+const totalNumbers = computed(() => {
+  return normalizarNumeros(props.numbers).length
+})
 </script>
 
 <template>
-  <div v-if="numbers.length" class="mt-6">
+  <div v-if="totalNumbers" class="mt-6">
     <!-- HEADER -->
     <div class="d-flex align-center justify-space-between mb-4">
       <div class="d-flex align-center gap-2">
         <VIcon icon="tabler-phone" size="20" class="text-primary" />
 
         <span class="text-subtitle-1 font-weight-medium">
-          {{ numbers.length }} números adicionados
+          {{ totalNumbers }} números adicionados
         </span>
       </div>
 

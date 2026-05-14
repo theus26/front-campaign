@@ -6,6 +6,7 @@ const defaultConfig: IGroupContactConfig = {
   deleteGroupContact: "/Grupo/RemoverGrupo",
   getGroupContactById: "/Grupo/ObterGrupoPorId",
   getListGroupContacts: "/Grupo/ListarGrupos",
+  getListAllGroupContacts: "Grupo/ListarGruposSemPaginacao",
 };
 
 export default defaultConfig;

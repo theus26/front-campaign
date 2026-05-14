@@ -94,6 +94,12 @@ export interface ICampaign {
 }
 
 export type Contato = {
-  numero: string
-  nome: string
-}
+  numero: string;
+  nome: string;
+};
+
+export type GrupoContato = {
+  grupoId: string;
+  nome: string;
+  contatosGrupoDto: Contato[];
+};

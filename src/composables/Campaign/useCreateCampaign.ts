@@ -1,4 +1,5 @@
 import {
+  GrupoContato,
   ICampaign,
   IUpdateCampaign,
 } from "@/@core/services/interfaces/campaign/ICampaignService";
@@ -6,14 +7,17 @@ import {
   IContactsAll,
   IContatosFiltrosSemPaginacaoDto,
 } from "@/@core/services/interfaces/contacts/IContactsService";
+import { IGruposContatosDto } from "@/@core/services/interfaces/group-contacts/IGroupContactsService";
 import { router } from "@/plugins/1.router";
 import useCampaign from "@/services/campaign/useCampaign";
 import useContacts from "@/services/contacts/useContacts";
+import useGroupContact from "@/services/group-contacts/useGroupContact";
 import { useCampaignStore } from "@/store/campaign";
 import { useRoute } from "vue-router";
 import { useToast } from "vue-toast-notification";
 import { VForm } from "vuetify/components";
 import * as XLSX from "xlsx";
+import { formatInputNumber } from "../Contacts/useFormatNumberComposable";
 
 export function useCreateCampaign() {
   const $toast = useToast();
@@ -28,6 +32,7 @@ export function useCreateCampaign() {
 
   const numeros = ref<string[]>([]);
   const contatos = ref<IContactsAll[]>([]);
+  const grupoContatos = ref<IGruposContatosDto[]>([]);
 
   const stepOneForm = reactive({
     nameCampaign: "",
@@ -43,7 +48,8 @@ export function useCreateCampaign() {
   const campaign = ref<ICampaign | null>(null);
   const fileName = ref("");
   const shippingNumbers = ref<string[]>([]);
-  const selectedContacts = ref<"import" | "contatos" | "grupos">("import");
+  const selectedGroups = ref<GrupoContato[]>([]);
+  const selectedContacts = ref<"import" | "contatos" | "grupos">("contatos");
   const message = ref("");
   const showSuccessDialogDesconectar = ref(false);
   const showSuccessDialogExcluir = ref(false);
@@ -93,6 +99,18 @@ export function useCreateCampaign() {
       return false;
     }
     return true;
+  };
+
+  const getGroupPreview = (group: any) => {
+    if (!group.contatosGrupoDto?.length) {
+      return "Nenhum contato";
+    }
+
+    const nomes = group.contatosGrupoDto
+      .slice(0, 3)
+      .map((c: any) => c.nome || formatInputNumber(c.numero));
+
+    return `${group.contatosGrupoDto.length} contatos • ${nomes.join(", ")}${group.contatosGrupoDto.length > 3 ? "..." : ""}`;
   };
 
   const getDetailCampaign = (obj: any) => {
@@ -311,6 +329,10 @@ export function useCreateCampaign() {
     });
   };
 
+  const isArrayOfObjects = (arr: any[]) => {
+    return arr.length > 0 && typeof arr[0] === "object";
+  };
+
   watch(
     stepOneForm,
     (newVal) => {
@@ -325,9 +347,34 @@ export function useCreateCampaign() {
   watch(
     shippingNumbers,
     (newVal) => {
+      if (isArrayOfObjects(newVal)) {
+        const numeros = newVal.flatMap((grupo: any) =>
+          grupo.contatosGrupoDto.map((contato: any) => contato.numero),
+        );
+
+        campaignStore.setDraft({ numbers: numeros });
+        return;
+      }
+
       campaignStore.setDraft({ numbers: newVal });
     },
     { deep: true },
+  );
+
+  watch(
+    selectedGroups,
+    (groups) => {
+      shippingNumbers.value = [
+        ...new Set(
+          groups.flatMap((group) =>
+            group.contatosGrupoDto.map((c) => c.numero),
+          ),
+        ),
+      ];
+    },
+    {
+      deep: true,
+    },
   );
 
   const listAllContatcts = async () => {
@@ -341,14 +388,30 @@ export function useCreateCampaign() {
     }
   };
 
-  onMounted(async () => {
-    if (isEdit.value) {
-      campaign.value = await useCampaign.getCampaignById(
-        String(route.params.id),
-      );
-      fillCampaign(campaign.value);
+  const listAllGroupContatcts = async () => {
+    try {
+      const data = await useGroupContact.getListAllGroupContacts();
+
+      grupoContatos.value = data;
+    } catch (error: any) {
+      console.error("Erro ao buscar contatos:", error);
     }
-    await listAllContatcts();
+  };
+
+  onMounted(async () => {
+    try {
+      if (isEdit.value) {
+        campaign.value = await useCampaign.getCampaignById(
+          String(route.params.id),
+        );
+
+        fillCampaign(campaign.value);
+      }
+
+      await Promise.all([listAllContatcts(), listAllGroupContatcts()]);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    }
   });
 
   return {
@@ -360,7 +423,7 @@ export function useCreateCampaign() {
     validateStepOne,
     validateStepTwo,
     validateStepThree,
-
+    getGroupPreview,
     // forms
     stepOneForm,
     formRef,
@@ -368,6 +431,7 @@ export function useCreateCampaign() {
     // step2
     shippingNumbers,
     contatos,
+    grupoContatos,
     numeros,
     selectedContacts,
     message,
@@ -380,7 +444,7 @@ export function useCreateCampaign() {
     showSuccessDialogDesconectar,
     showSuccessDialogExcluir,
     showCancelDialog,
-
+    selectedGroups,
     handleCancel,
     getInitials,
     // store

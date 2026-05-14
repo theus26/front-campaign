@@ -7,7 +7,7 @@ import { VForm } from 'vuetify/components';
 import NumbersPreview from '../components/NumbersPreview.vue';
 
 const emit = defineEmits(['next', 'back']);
-const { shippingNumbers, contatos, numeros, selectedContacts, message, loading, fileName, fileInput, formRef, isEdit, addNumber, deleteNumber, handleFileUpload, validateStepTwo, updateCampaign, customFilter, getInitials } = useCreateCampaign()
+const { shippingNumbers, contatos, numeros, selectedGroups, selectedContacts, grupoContatos, message, loading, fileName, fileInput, formRef, isEdit, addNumber, getGroupPreview, deleteNumber, handleFileUpload, validateStepTwo, updateCampaign, customFilter, getInitials } = useCreateCampaign()
 const { createDraft, loadingDraft } = useCreateDraftCampaign()
 
 
@@ -34,8 +34,6 @@ const onNext = async () => {
 
       <VCol cols="12" v-if="selectedContacts === 'contatos'">
         <VCol cols="12">
-
-
           <AppAutocomplete v-model="shippingNumbers" label="Selecione os contatos" placeholder="Selecione"
             :items="contatos" item-title="nome" item-value="numero" :custom-filter="customFilter" multiple chips
             closable-chips clearable :return-object="false" prepend-inner-icon="tabler-users">
@@ -54,6 +52,41 @@ const onNext = async () => {
             <template #chip="{ props, item }">
               <VChip v-bind="props" size="small" :color="item.raw.nome ? 'primary' : 'warning'" variant="tonal">
                 {{ item.raw.nome ?? "Sem nome" }}
+              </VChip>
+            </template>
+          </AppAutocomplete>
+
+        </VCol>
+
+        <VExpandTransition>
+          <div v-if="shippingNumbers.length" class="mt-6">
+            <p class="text-sm text-gray-400 mb-2 font-medium">Números adicionados</p>
+            <NumbersPreview :numbers="shippingNumbers" :onDelete="deleteNumber" />
+          </div>
+        </VExpandTransition>
+      </VCol>
+
+
+      <VCol cols="12" v-if="selectedContacts === 'grupos'">
+        <VCol cols="12">
+          <AppAutocomplete v-model="selectedGroups" label="Selecione os grupos" placeholder="Selecione"
+            :items="grupoContatos" item-title="nome" item-value="grupoId" :custom-filter="customFilter" multiple chips
+            closable-chips clearable :return-object="true" prepend-inner-icon="tabler-users">
+            <!-- Item da lista -->
+            <template #item="{ props, item }">
+              <VListItem v-bind="props" :title="item.raw.nome" :subtitle="getGroupPreview(item.raw)">
+                <template #prepend>
+                  <VAvatar size="32" color="primary" variant="tonal">
+                    {{ getInitials(item.raw.nome) }}
+                  </VAvatar>
+                </template>
+              </VListItem>
+            </template>
+
+            <!-- Chips selecionados -->
+            <template #chip="{ props, item }">
+              <VChip v-bind="props" size="small" color="primary" variant="tonal">
+                {{ item.raw.nome }}
               </VChip>
             </template>
           </AppAutocomplete>

@@ -9,6 +9,7 @@ export interface IGroupContactsService {
     data: IAtualizarGrupoContato,
   ): Promise<void>;
   getGroupContactById(groupContactId: string): Promise<IGruposContatosDto>;
+  getListAllGroupContacts(): Promise<IGruposContatosDto[]>;
   getListGroupContacts(
     filter: IGruposFiltros,
   ): Promise<IPaginacao<IGruposContatosDto>>;
@@ -22,6 +23,7 @@ export type IGroupContactConfig = {
   deleteGroupContact: string;
   getGroupContactById: string;
   getListGroupContacts: string;
+  getListAllGroupContacts: string;
 };
 
 export interface ICriarGrupoContato {
