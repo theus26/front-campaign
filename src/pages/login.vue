@@ -1,6 +1,6 @@
 <!-- ❗Errors in the form are set on line 60 -->
 <script setup lang="ts">
-import { IBodyLogin, IResponseAuth } from '@/@core/services/interfaces/auth/IAuthService'
+import { IBodyLogin } from '@/@core/services/interfaces/auth/IAuthService'
 import useAuth from "@/services/auth/useAuth"
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
@@ -49,23 +49,9 @@ const loading = ref(false)
 
 const rememberMe = ref(false)
 
-const setSession = (data: IResponseAuth) => {
-  const { token, refreshToken, userData, userAbilityRules } = data;
-
-  useCookie("accessToken").value = token;
-  useCookie("refreshToken").value = refreshToken;
-  useCookie("userData").value = userData;
-
-  if (userAbilityRules) {
-    useCookie("userAbilityRules").value = userAbilityRules;
-    ability.update(userAbilityRules);
-  }
-}
-
 const login = async () => {
   loading.value = true
   try {
-
 
     const payload: IBodyLogin = {
       email: credentials.value.email,
@@ -73,19 +59,18 @@ const login = async () => {
     }
     const response = await useAuth.login(payload)
 
-    const { token, refreshToken, userData, userAbilityRules } = response;
+    const { accessToken, refreshToken, userData, userAbilityRules } = response;
 
     useCookie("userAbilityRules").value = userAbilityRules;
     ability.update(userAbilityRules);
 
     useCookie("userData").value = userData;
-    useCookie("accessToken").value = token;
+    useCookie("accessToken").value = accessToken;
     useCookie("refreshToken").value = refreshToken;
 
     // Redirect to `to` query if exist or redirect to index route
     // ❗ nextTick is required to wait for DOM updates and later redirect
     await nextTick(() => {
-
       router.replace(route.query.to ? String(route.query.to) : "/");
     });
 

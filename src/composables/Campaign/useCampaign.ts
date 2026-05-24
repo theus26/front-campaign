@@ -5,10 +5,10 @@ import {
 } from "@/@core/services/interfaces/campaign/ICampaignService";
 import { router } from "@/plugins/1.router";
 import useCampaign from "@/services/campaign/useCampaign";
+import { format, parse } from "date-fns";
 import { ref } from "vue";
 import { useToast } from "vue-toast-notification";
 import { useListCampaign } from "./useListCampaign";
-
 export function useCampaignList() {
   const toast = useToast();
   const searchQuery = ref("");
@@ -116,7 +116,21 @@ export function useCampaignList() {
   const resolveRecurrence = createResolver(campaignTypeMap);
 
   const formatDate = (date: string | null) => {
-    return date ? new Date(date).toLocaleDateString("pt-BR") : "-";
+    if (!date) return "";
+
+    try {
+      // Remove o 'Z' (UTC) e trata como local
+      if (date.includes("Z")) {
+        const dataSemUtc = date.replace(/Z$/, "");
+        const dataObj = parse(dataSemUtc, "yyyy-MM-dd'T'HH:mm:ss", new Date());
+        return format(dataObj, "dd/MM/yyyy");
+      }
+      const dataObj = parse(date, "yyyy-MM-dd", new Date());
+      return format(dataObj, "dd/MM/yyyy");
+    } catch (error) {
+      console.error("Erro ao formatar data:", error);
+      return "";
+    }
   };
 
   const getInitials = (name: string) => {

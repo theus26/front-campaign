@@ -47,6 +47,8 @@ const {
   loadProviders,
   createProvider,
   syncContactsInBackground,
+  stringToColor,
+  getInitials
 } = useProvidersManager()
 
 const { validateStepThree, updateCampaign, isEdit } = useCreateCampaign()
@@ -115,6 +117,11 @@ const onNext = async () => {
             <div class="d-flex align-center gap-x-4">
               <VAvatar v-if="item.profilePictureUrl" size="38" variant="tonal" rounded
                 :image="item.profilePictureUrl" />
+              <VAvatar v-else size="38" rounded :style="{ backgroundColor: stringToColor(item.name || '') }">
+                <span class="text-white text-sm font-weight-medium">
+                  {{ getInitials(item.name || '') }}
+                </span>
+              </VAvatar>
               <div class="d-flex flex-column">
                 <span class="text-body-1 font-weight-medium text-high-emphasis">
                   {{ item.name }}
@@ -139,21 +146,24 @@ const onNext = async () => {
               <VIcon icon="tabler-dots-vertical" />
               <VMenu activator="parent">
                 <VList>
-                  <template v-if="item.status === 'close'">
-                    <VListItem value="reconnect" prepend-icon="tabler-refresh" @click="openReconnectDialog(item)">
+                  <template v-if="item.status === 'close' || item.status === null">
+                    <VListItem value="reconnect" prepend-icon="tabler-refresh" class="text-warning"
+                      @click="openReconnectDialog(item)">
                       Reconectar
                     </VListItem>
 
-                    <VListItem value="delete" prepend-icon="tabler-trash" @click="openDeleteDialog(item)">
+                    <VListItem value="delete" prepend-icon="tabler-trash" class="text-error"
+                      @click="openDeleteDialog(item)">
                       Excluir
                     </VListItem>
                   </template>
 
                   <template v-else>
-                    <VListItem value="disconnect" prepend-icon="tabler-refresh-off" @click="openDisconnectDialog(item)">
+                    <VListItem value="disconnect" class="text-error" prepend-icon="tabler-refresh-off"
+                      @click="openDisconnectDialog(item)">
                       Desconectar
                     </VListItem>
-                    <VListItem value="sync" prepend-icon="tabler-refresh"
+                    <VListItem value="sync" class="text-success" prepend-icon="tabler-refresh"
                       @click="syncContactsInBackground(item.instanceName)">
                       Sincronizar Contatos
                     </VListItem>

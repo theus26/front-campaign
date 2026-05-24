@@ -154,13 +154,11 @@ const deleteMessage = (msgGrp: any, msgData: any) => {
 
 <template>
   <div class="chat-log pa-6">
-    <div v-for="(msgGrp, index) in msgGroups" :key="msgGrp.senderId + String(index)" class="chat-group d-flex" :class="[
-      {
-        'justify-end mb-6': msgGrp.senderId !== contact.id,
-        'justify-start mb-6': msgGrp.senderId === contact.id,
-      },
-      msgGroups.length - 1 === index ? 'mb-0' : '',
-    ]">
+    <div v-for="(msgGrp, index) in msgGroups" :key="msgGrp.senderId + String(index)"
+      class="chat-group d-flex justify-end mb-6" :class="[
+
+        msgGroups.length - 1 === index ? 'mb-0' : '',
+      ]">
       <div class="chat-body d-flex flex-column">
         <div v-if="msgGrp.messages.length > 0" v-for="(msgData, msgIndex) in msgGrp.messages" :key="msgData.time"
           class="d-flex align-center mb-2" :class="msgGrp.senderId !== contact.id ? 'justify-end' : 'justify-start'">
@@ -172,18 +170,36 @@ const deleteMessage = (msgGrp: any, msgData: any) => {
             </template>
 
             <template v-else-if="msgData.mediaType === 'image'">
-              <img :src="msgData.mediaUrl" alt="Anexo de imagem" class="chat-image" />
+              <div class="media-container">
+                <img :src="msgData.mediaUrl" alt="Anexo de imagem" class="chat-image" />
+              </div>
             </template>
 
             <template v-else-if="msgData.mediaType === 'document'">
-              <iframe :src="msgData.mediaUrl" allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
-                class="chat-document" />
+              <div
+                class="w-full max-w-[520px] overflow-hidden rounded-2xl border border-white/10 bg-[#1f2330] shadow-lg">
+                <iframe :src="msgData.mediaUrl" allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
+                  class="h-[320px] w-full border-0 bg-white" />
+              </div>
             </template>
 
             <template v-else-if="msgData.mediaType === 'video'">
-              <video class="tw-h-full tw-w-full" :src="msgData.mediaUrl" controls :loop="true">
-                Seu navegador não suporta a reprodução de vídeo.
-              </video>
+              <div
+                class="tw-w-full tw-max-w-[420px] tw-h-[240px] tw-overflow-hidden tw-rounded-2xl tw-border tw-border-white/10 tw-bg-black">
+                <video :src="msgData.mediaUrl" controls playsinline preload="metadata" class="
+      tw-block
+      !tw-w-full
+      !tw-h-full
+      tw-max-w-none
+      tw-max-h-none
+      tw-object-cover
+      tw-bg-black
+      tw-align-middle
+      tw-flex-none
+      tw-shrink-0
+      tw-grow-0
+    " />
+              </div>
             </template>
           </div>
 
@@ -192,7 +208,7 @@ const deleteMessage = (msgGrp: any, msgData: any) => {
 
             <VMenu activator="parent">
               <VList density="compact">
-                <VListItem @click="openEditModal(msgGrp, msgData)">
+                <VListItem v-if="msgData.mediaType === `text`" @click="openEditModal(msgGrp, msgData)">
                   <template #prepend>
                     <VIcon icon="tabler-edit" color="primary" />
                   </template>
@@ -302,9 +318,7 @@ const deleteMessage = (msgGrp: any, msgData: any) => {
 }
 
 .chat-image,
-.chat-document,
-video {
-  max-width: 100%;
+.chat-document {
   border-radius: 8px;
 }
 
@@ -312,5 +326,51 @@ video {
   width: 300px;
   height: 400px;
   border: none;
+}
+
+.media-container {
+  max-width: 320px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #1e1e1e;
+}
+
+.chat-image {
+  width: 100%;
+  max-height: 350px;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.chat-image:hover {
+  transform: scale(1.02);
+}
+
+video {
+  display: block;
+  /* Permite o uso de propriedades de caixa/modelo */
+  width: 100%;
+  /* Respeita o limite do elemento pai */
+  max-width: 600px;
+  /* Largura máxima para não estourar em telas grandes */
+  height: 300px;
+  /* Mantém a proporção original do vídeo */
+  object-fit: contain;
+  /* Ajusta o vídeo dentro do espaço sem distorcer */
+}
+
+.video-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  /* Centraliza o contêiner na página */
+}
+
+.video-container video {
+  width: 100%;
+  /* Força o vídeo a preencher a div */
+  height: auto;
 }
 </style>

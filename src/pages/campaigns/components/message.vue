@@ -99,13 +99,16 @@ const triggerFileSelection = () => {
 };
 const onFileChange = async (event: Event, index: number) => {
   const file = (event.target as HTMLInputElement).files?.[0];
+
   if (!file) return;
 
   if (isFileSizeValid(file.size)) {
     try {
       const base64 = await convertToBase64(file);
+      const base64SemPrefix = base64.split(',')[1];
       const dataUrl = URL.createObjectURL(file);
-      sendMessageMedia(index, file, base64, dataUrl);
+
+      sendMessageMedia(index, file, base64, dataUrl, base64SemPrefix, file.type);
     } catch (error) {
       $toast.error('Erro ao processar o arquivo.', { duration: 5000 });
     }
@@ -114,7 +117,7 @@ const onFileChange = async (event: Event, index: number) => {
   }
 };
 const isFileSizeValid = (size: number) => size / (1024 * 1024) <= MAX_FILE_SIZE_MB;
-const sendMessageMedia = async (index: number, file: File, base64: string, dataUrl: string) => {
+const sendMessageMedia = async (index: number, file: File, base64: string, dataUrl: string, base64SemPrefix: string, mimeType: string) => {
   messages.value[index] = {
     filename: file.name,
     ...parseBase64(base64),
@@ -123,6 +126,7 @@ const sendMessageMedia = async (index: number, file: File, base64: string, dataU
   const data = new Date();
 
   const mediaType = messages.value[index].mediatype ? messages.value[index].mediatype.split("/")[0] : '';
+
   const msg: ChatMessage = {
     mediaUrl: base64,
     mediaType: mediaType,
@@ -140,10 +144,10 @@ const sendMessageMedia = async (index: number, file: File, base64: string, dataU
     type: mediaType,
     message: null,
     mediaType: mediaType,
-    mimetype: mediaType,
+    mimetype: mimeType,
     caption: null,
     fileName: file.name,
-    media: base64,
+    media: base64SemPrefix,
     dataUrl: dataUrl,
   };
   setDraftOfCampaign(message);
@@ -209,10 +213,11 @@ const getFormattedCurrentTime = () => {
 };
 
 const normalizeDraftMessages = (messages: any[] = []) => {
+  console.log(messages);
 
   return messages.map((message) => ({
     mediaType: message.type ?? message.mediaType ?? "text",
-    mediaUrl: message.media ?? message.mediaUrl ?? undefined,
+    mediaUrl: `data:image/png;base64,${message.media}` || message.mediaUrl || undefined,
     feedback: {
       isSent: true,
       isDelivered: true,
@@ -318,6 +323,8 @@ const mockData: ActiveChat = {
 
 onMounted(async () => {
   if (isEdit.value) {
+    console.log(chatData.value);
+
     store.activeChat = chatData.value;
     return;
   }

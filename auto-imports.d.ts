@@ -71,6 +71,7 @@ declare global {
   const isReadonly: typeof import('vue')['isReadonly']
   const isRef: typeof import('vue')['isRef']
   const isToday: typeof import('./src/@core/utils/helpers')['isToday']
+  const isValidDate: typeof import('./src/@core/utils/validators')['isValidDate']
   const kFormatter: typeof import('./src/@core/utils/formatters')['kFormatter']
   const lengthValidator: typeof import('./src/@core/utils/validators')['lengthValidator']
   const logicAnd: typeof import('@vueuse/math')['logicAnd']
@@ -439,6 +440,7 @@ declare module 'vue' {
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
     readonly isToday: UnwrapRef<typeof import('./src/@core/utils/helpers')['isToday']>
+    readonly isValidDate: UnwrapRef<typeof import('./src/@core/utils/validators')['isValidDate']>
     readonly kFormatter: UnwrapRef<typeof import('./src/@core/utils/formatters')['kFormatter']>
     readonly lengthValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['lengthValidator']>
     readonly logicAnd: UnwrapRef<typeof import('@vueuse/math')['logicAnd']>

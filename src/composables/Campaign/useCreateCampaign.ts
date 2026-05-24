@@ -37,8 +37,8 @@ export function useCreateCampaign() {
   const stepOneForm = reactive({
     nameCampaign: "",
     typeCampaign: "",
-    dataStart: null,
-    dataEnd: null,
+    dataStart: "",
+    dataEnd: "",
     messageBreak: null,
     intervalRepeat: null,
     startTime: "",
@@ -258,6 +258,10 @@ export function useCreateCampaign() {
     showCancelDialog.value = true;
   };
 
+  const formatarData = (data?: string | null) => {
+    return data?.substring(0, 10) ?? null;
+  };
+
   const updatePayload = (): IUpdateCampaign => {
     return {
       ...campaign.value,
@@ -309,14 +313,13 @@ export function useCreateCampaign() {
     stepOneForm.nameCampaign = data.name;
     stepOneForm.typeCampaign =
       data.recurrence === "Unique" ? "unica" : "recorrente";
-    stepOneForm.dataStart = data.startCampaign;
-    stepOneForm.dataEnd = data.endCampaign;
+    stepOneForm.dataStart = formatarData(data.startCampaign) ?? "";
+    stepOneForm.dataEnd = formatarData(data.endCampaign) ?? "";
     stepOneForm.messageBreak = data.intervalMessage;
     stepOneForm.intervalRepeat = data.intervalRepeat;
     stepOneForm.startTime = data.startTime;
     stepOneForm.endTime = data.timeEnd;
     // STEP TWO
-
     shippingNumbers.value = data.numbers || [];
 
     // STEP THREE -

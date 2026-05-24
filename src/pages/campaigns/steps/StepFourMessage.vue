@@ -94,6 +94,7 @@ const onCreate = async () => {
     console.log('Constructed payload for campaign creation:', payload)
     await useCampaignService.createCampaign(payload)
     toast.success('Campanha criada com sucesso!')
+    store.clearDraft()
     router.push({ name: 'campaigns-list' })
   }
   catch (error) {

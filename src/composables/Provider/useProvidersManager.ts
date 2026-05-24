@@ -189,6 +189,22 @@ export function useProvidersManager() {
     if (options.itemsPerPage) itemsPerPage.value = options.itemsPerPage;
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .slice(0, 2)
+      .map((w) => w[0].toUpperCase())
+      .join("");
+  };
+
+  const stringToColor = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return `hsl(${hash % 360}, 60%, 50%)`;
+  };
+
   const onSelectRow = (rows: IProvider[]) => {
     if (rows.length > 0) {
       campaignStore.setDraft({
@@ -198,6 +214,8 @@ export function useProvidersManager() {
   };
 
   const resolveStatus = (status: string) => {
+    console.log(status);
+
     switch (status) {
       case "open":
         return { color: "success", text: "Conectado" };
@@ -277,5 +295,7 @@ export function useProvidersManager() {
     resolveStatus,
     createNewProvider,
     syncContactsInBackground,
+    stringToColor,
+    getInitials,
   };
 }
