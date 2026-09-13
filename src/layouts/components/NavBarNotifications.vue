@@ -1,92 +1,43 @@
 <script lang="ts" setup>
-import type { Notification } from '@layouts/types'
+import { useCampaignHub } from '@/composables/useCampaignHub'
+import { useNotificationStore } from '@/store/notifications'
+import { router } from '@/plugins/1.router'
 
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar4 from '@images/avatars/avatar-4.png'
-import avatar5 from '@images/avatars/avatar-5.png'
-import paypal from '@images/cards/paypal-rounded.png'
-
-const notifications = ref<Notification[]>([
-  {
-    id: 1,
-    img: avatar4,
-    title: 'Congratulation Flora! 🎉',
-    subtitle: 'Won the monthly best seller badge',
-    time: 'Today',
-    isSeen: true,
-  },
-  {
-    id: 2,
-    text: 'Tom Holland',
-    title: 'New user registered.',
-    subtitle: '5 hours ago',
-    time: 'Yesterday',
-    isSeen: false,
-  },
-  {
-    id: 3,
-    img: avatar5,
-    title: 'New message received 👋🏻',
-    subtitle: 'You have 10 unread messages',
-    time: '11 Aug',
-    isSeen: true,
-  },
-  {
-    id: 4,
-    img: paypal,
-    title: 'PayPal',
-    subtitle: 'Received Payment',
-    time: '25 May',
-    isSeen: false,
-    color: 'error',
-  },
-  {
-    id: 5,
-    img: avatar3,
-    title: 'Received Order 📦',
-    subtitle: 'New order received from john',
-    time: '19 Mar',
-    isSeen: true,
-  },
-])
+const notificationStore = useNotificationStore()
+useCampaignHub()
 
 const removeNotification = (notificationId: number) => {
-  notifications.value.forEach((item, index) => {
-    if (notificationId === item.id)
-      notifications.value.splice(index, 1)
-  })
+  notificationStore.removeNotification(notificationId)
 }
 
 const markRead = (notificationId: number[]) => {
-  notifications.value.forEach(item => {
-    notificationId.forEach(id => {
-      if (id === item.id)
-        item.isSeen = true
-    })
-  })
+  notificationStore.markRead(notificationId)
 }
 
 const markUnRead = (notificationId: number[]) => {
-  notifications.value.forEach(item => {
-    notificationId.forEach(id => {
-      if (id === item.id)
-        item.isSeen = false
-    })
-  })
+  notificationStore.markUnRead(notificationId)
 }
 
-const handleNotificationClick = (notification: Notification) => {
+const handleNotificationClick = (notification: { isSeen: boolean; id: number; campaignId?: string }) => {
   if (!notification.isSeen)
     markRead([notification.id])
+
+  if (notification.campaignId)
+    router.push('/campaigns/list')
+}
+
+const clearAll = () => {
+  notificationStore.clearAll()
 }
 </script>
 
 <template>
   <Notifications
-    :notifications="notifications"
+    :notifications="notificationStore.notifications"
     @remove="removeNotification"
     @read="markRead"
     @unread="markUnRead"
+    @clear="clearAll"
     @click:notification="handleNotificationClick"
   />
 </template>

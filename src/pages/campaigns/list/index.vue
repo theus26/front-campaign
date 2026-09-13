@@ -17,6 +17,8 @@ const {
   resolveStatus,
   resolveRecurrence,
   formatDate,
+  formatTime,
+  formatEstimatedDuration,
   getInitials,
   stringToColor,
   getCampaignActions,
@@ -117,6 +119,12 @@ const {
           </VChip>
         </template>
 
+           <template #item.estimatedDuration="{ item }">
+          <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{
+            formatEstimatedDuration(item.estimatedDuration)
+            }}</span>
+        </template>
+
         <template #item.inbox="{ item }">
           <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ item.providerName }}</span>
         </template>
@@ -129,10 +137,11 @@ const {
         </template>
 
         <template #item.endDate="{ item }">
-          <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ formatDate(item.endCampaign ||
-            null)
+          <span class="text-body-1 font-weight-medium text-high-emphasis text-center">{{ formatTime(item.timeEnd)
             }}</span>
         </template>
+
+     
 
         <template #item.status="{ item }">
           <VChip :color="resolveStatus(item.status || '').color" size="small" label>

@@ -126,6 +126,7 @@ export type Notification = {
   time: string;
   color?: string;
   isSeen: boolean;
+  campaignId?: string;
 } & (
   | { img: string; text?: never; icon?: never }
   | { img?: never; text: string; icon?: never }

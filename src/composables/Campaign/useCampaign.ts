@@ -5,12 +5,14 @@ import {
 } from "@/@core/services/interfaces/campaign/ICampaignService";
 import { router } from "@/plugins/1.router";
 import useCampaign from "@/services/campaign/useCampaign";
+import { useNotificationStore } from "@/store/notifications";
 import { format, parse } from "date-fns";
 import { ref } from "vue";
 import { useToast } from "vue-toast-notification";
 import { useListCampaign } from "./useListCampaign";
 export function useCampaignList() {
   const toast = useToast();
+  const notificationStore = useNotificationStore();
   const searchQuery = ref("");
   const itemsPerPage = ref(10);
   const page = ref(1);
@@ -54,6 +56,12 @@ export function useCampaignList() {
       align: "center" as const,
       sortable: false,
     },
+     {
+      title: "Duração estimada",
+      key: "estimatedDuration",
+      align: "center" as const,
+      sortable: false,
+    },
     {
       title: "Data de inicio",
       key: "startDate",
@@ -61,11 +69,12 @@ export function useCampaignList() {
       sortable: false,
     },
     {
-      title: "Data de término",
+      title: "Horário de término",
       key: "endDate",
       align: "center" as const,
       sortable: false,
     },
+   
     {
       title: "Ações",
       key: "actions",
@@ -115,22 +124,114 @@ export function useCampaignList() {
   const resolveStatus = createResolver(campaignStatusMap);
   const resolveRecurrence = createResolver(campaignTypeMap);
 
+  const isValidDate = (value: Date) => !Number.isNaN(value.getTime());
+
   const formatDate = (date: string | null) => {
     if (!date) return "";
 
     try {
-      // Remove o 'Z' (UTC) e trata como local
-      if (date.includes("Z")) {
-        const dataSemUtc = date.replace(/Z$/, "");
+      if (date.includes("Z") || date.includes("T")) {
+        const dataSemUtc = date.replace(/Z$/, "").split(".")[0];
         const dataObj = parse(dataSemUtc, "yyyy-MM-dd'T'HH:mm:ss", new Date());
-        return format(dataObj, "dd/MM/yyyy");
+
+        if (isValidDate(dataObj)) return format(dataObj, "dd/MM/yyyy");
+
+        const fallback = new Date(date);
+        return isValidDate(fallback) ? format(fallback, "dd/MM/yyyy") : "";
       }
+
       const dataObj = parse(date, "yyyy-MM-dd", new Date());
-      return format(dataObj, "dd/MM/yyyy");
+      if (isValidDate(dataObj)) return format(dataObj, "dd/MM/yyyy");
+
+      const fallback = new Date(date);
+      return isValidDate(fallback) ? format(fallback, "dd/MM/yyyy") : "";
     } catch (error) {
       console.error("Erro ao formatar data:", error);
       return "";
     }
+  };
+
+  const formatTime = (time?: string | null) => {
+    if (!time) return "";
+
+    const timeSpanMatch =
+      /^(?:(\d+)\.)?(\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?$/.exec(time.trim());
+
+    if (timeSpanMatch) {
+      const hours = timeSpanMatch[2].padStart(2, "0");
+      const minutes = timeSpanMatch[3];
+      return `${hours}:${minutes}`;
+    }
+
+    try {
+      if (time.includes("T") || time.includes("Z")) {
+        const dataSemUtc = time.replace(/Z$/, "").split(".")[0];
+        const dataObj = parse(dataSemUtc, "yyyy-MM-dd'T'HH:mm:ss", new Date());
+        if (isValidDate(dataObj)) return format(dataObj, "HH:mm");
+      }
+    } catch (error) {
+      console.error("Erro ao formatar horário:", error);
+    }
+
+    return time;
+  };
+
+  const formatDurationParts = (days: number, hours: number, minutes: number) => {
+    const parts: string[] = [];
+
+    if (days) parts.push(`${days}d`);
+    if (hours) parts.push(`${hours}h`);
+    if (minutes || !parts.length) parts.push(`${minutes}min`);
+
+    return parts.join(" ");
+  };
+
+  const formatEstimatedDuration = (value?: unknown) => {
+    if (value == null || value === "") return "";
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+      const totalMinutes = Math.round(value);
+      const days = Math.floor(totalMinutes / 1440);
+      const hours = Math.floor((totalMinutes % 1440) / 60);
+      const minutes = totalMinutes % 60;
+      return formatDurationParts(days, hours, minutes);
+    }
+
+    if (typeof value === "object") {
+      const duration = value as Record<string, unknown>;
+      const totalMinutes = duration.totalMinutes ?? duration.TotalMinutes;
+
+      if (typeof totalMinutes === "number") {
+        return formatEstimatedDuration(totalMinutes);
+      }
+
+      const days = Number(duration.days ?? duration.Days ?? 0);
+      const hours = Number(duration.hours ?? duration.Hours ?? 0);
+      const minutes = Number(duration.minutes ?? duration.Minutes ?? 0);
+
+      if ([days, hours, minutes].some((part) => part > 0)) {
+        return formatDurationParts(days, hours, minutes);
+      }
+    }
+
+    if (typeof value === "string") {
+      const normalized = value.trim();
+      const timeSpanMatch =
+        /^(?:(\d+)\.)?(\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?$/.exec(
+          normalized,
+        );
+
+      if (timeSpanMatch) {
+        const days = Number(timeSpanMatch[1] ?? 0);
+        const hours = Number(timeSpanMatch[2]);
+        const minutes = Number(timeSpanMatch[3]);
+        return formatDurationParts(days, hours, minutes);
+      }
+
+      return normalized;
+    }
+
+    return "";
   };
 
   const getInitials = (name: string) => {
@@ -314,9 +415,20 @@ export function useCampaignList() {
     ];
   });
 
-  onMounted(async () => {
+  const loadReports = async () => {
     reports.value = await useCampaign.reportsCampaign();
+  };
+
+  onMounted(async () => {
+    await loadReports();
   });
+
+  watch(
+    () => notificationStore.lastCampaignEvent,
+    async (event) => {
+      if (event?.type === "CampaignUpdated") await loadReports();
+    },
+  );
 
   return {
     searchQuery,
@@ -335,6 +447,8 @@ export function useCampaignList() {
     resolveStatus,
     resolveRecurrence,
     formatDate,
+    formatTime,
+    formatEstimatedDuration,
     getInitials,
     stringToColor,
     getSubtitle,

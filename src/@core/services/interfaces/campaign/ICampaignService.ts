@@ -91,6 +91,7 @@ export interface ICampaign {
   startCampaign?: string;
   endCampaign?: string;
   providerId?: string;
+  estimatedDuration?: string | number | null;
 }
 
 export type Contato = {

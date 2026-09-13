@@ -108,8 +108,18 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 5000,
   },
+  server: {
+    proxy: {
+      '/hubs': {
+        target: 'http://localhost:5136',
+        changeOrigin: true,
+        ws: true,
+      },
+    },
+  },
   optimizeDeps: {
     exclude: ['vuetify'],
+    include: ['@microsoft/signalr'],
     entries: [
       './src/**/*.vue',
     ],
