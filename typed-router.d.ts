@@ -53,6 +53,7 @@ declare module 'vue-router/auto-routes' {
     'campaigns-components-message': RouteRecordInfo<'campaigns-components-message', '/campaigns/components/message', Record<never, never>, Record<never, never>>,
     'campaigns-components-numbers-preview': RouteRecordInfo<'campaigns-components-numbers-preview', '/campaigns/components/NumbersPreview', Record<never, never>, Record<never, never>>,
     'campaigns-create': RouteRecordInfo<'campaigns-create', '/campaigns/create', Record<never, never>, Record<never, never>>,
+    'campaigns-dashboard-id': RouteRecordInfo<'campaigns-dashboard-id', '/campaigns/dashboard/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'campaigns-dialogs-connect-provider-dialog': RouteRecordInfo<'campaigns-dialogs-connect-provider-dialog', '/campaigns/dialogs/ConnectProviderDialog', Record<never, never>, Record<never, never>>,
     'campaigns-dialogs-delete-provider-dialog': RouteRecordInfo<'campaigns-dialogs-delete-provider-dialog', '/campaigns/dialogs/DeleteProviderDialog', Record<never, never>, Record<never, never>>,
     'campaigns-dialogs-disconnect-provider-dialog': RouteRecordInfo<'campaigns-dialogs-disconnect-provider-dialog', '/campaigns/dialogs/DisconnectProviderDialog', Record<never, never>, Record<never, never>>,

@@ -333,7 +333,17 @@ export function useCampaignList() {
   };
 
   const getCampaignActions = (status: string) => {
-    return campaignActionsMap[status as keyof typeof campaignActionsMap] ?? [];
+    const dashboardAction = {
+      key: "dashboard",
+      label: "Dashboard",
+      icon: "tabler-chart-histogram",
+      color: "info",
+    };
+
+    return [
+      dashboardAction,
+      ...(campaignActionsMap[status as keyof typeof campaignActionsMap] ?? []),
+    ];
   };
 
   const mapCampaignToUpdate = (
@@ -357,6 +367,11 @@ export function useCampaignList() {
   const handleAction = async (actionKey: string, item: ICampaign) => {
     if (actionKey === "edit") {
       router.push(`/campaigns/edit/${item.campaignId}`);
+      return;
+    }
+
+    if (actionKey === "dashboard") {
+      router.push(`/campaigns/dashboard/${item.campaignId}`);
       return;
     }
 
