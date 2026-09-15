@@ -30,39 +30,71 @@ const isLoading = ref(false)
 
 const suggestionGroups: SuggestionGroup[] = [
   {
-    title: 'Popular Searches',
+    title: 'Campanhas',
     content: [
-      { icon: 'tabler-chart-bar', title: 'Analytics', url: { name: 'dashboards-analytics' } },
-      { icon: 'tabler-chart-donut-3', title: 'CRM', url: { name: 'dashboards-crm' } },
-      { icon: 'tabler-shopping-cart', title: 'eCommerce', url: { name: 'dashboards-ecommerce' } },
-      { icon: 'tabler-truck', title: 'Logistics', url: { name: 'dashboards-logistics' } },
+      {
+        icon: 'tabler-smart-home',
+        title: 'Início',
+        url: { name: 'campaigns-home' },
+      },
+      {
+        icon: 'tabler-plus',
+        title: 'Criar Campanha',
+        url: { name: 'campaigns-create' },
+      },
+      {
+        icon: 'tabler-history',
+        title: 'Listar Campanhas',
+        url: { name: 'campaigns-list' },
+      },
     ],
   },
+
   {
-    title: 'Apps & Pages',
+    title: 'Contatos',
     content: [
-      { icon: 'tabler-calendar', title: 'Calendar', url: { name: 'apps-calendar' } },
-      { icon: 'tabler-lock', title: 'Roles & Permissions', url: { name: 'apps-roles' } },
-      { icon: 'tabler-settings', title: 'Account Settings', url: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
-      { icon: 'tabler-copy', title: 'Dialog Examples', url: { name: 'pages-dialog-examples' } },
+      {
+        icon: 'tabler-user-plus',
+        title: 'Criar Contato',
+        url: { name: 'contatos-add' },
+      },
+      {
+        icon: 'tabler-users',
+        title: 'Listar Contatos',
+        url: { name: 'contatos-list' },
+      },
     ],
   },
+
   {
-    title: 'User Interface',
+    title: 'Grupos de Contatos',
     content: [
-      { icon: 'tabler-typography', title: 'Typography', url: { name: 'pages-typography' } },
-      { icon: 'tabler-menu-2', title: 'Accordion', url: { name: 'components-expansion-panel' } },
-      { icon: 'tabler-info-triangle', title: 'Alert', url: { name: 'components-alert' } },
-      { icon: 'tabler-checkbox', title: 'Cards', url: { name: 'pages-cards-card-basic' } },
+      {
+        icon: 'tabler-users-plus',
+        title: 'Criar Grupo',
+        url: { name: 'grupo-contato-add' },
+      },
+      {
+        icon: 'tabler-users-group',
+        title: 'Listar Grupos',
+        url: { name: 'grupo-contato-list' },
+      },
     ],
   },
+
   {
-    title: 'Forms & Tables',
+    title: 'Conexões',
     content: [
-      { icon: 'tabler-circle-dot', title: 'Radio', url: { name: 'forms-radio' } },
-      { icon: 'tabler-file-invoice', title: 'Form Layouts', url: { name: 'forms-form-layouts' } },
-      { icon: 'tabler-table', title: 'Table', url: { name: 'tables-data-table' } },
-      { icon: 'tabler-edit', title: 'Editor', url: { name: 'forms-editors' } },
+      {
+        icon: 'tabler-qrcode',
+        title: 'Criar conexão',
+        url: { name: 'provider-add' },
+      },
+      {
+        icon: 'tabler-devices',
+        title: 'Listar Conexões',
+        url: { name: 'provider-list' },
+      },
     ],
   },
 ]
@@ -70,19 +102,19 @@ const suggestionGroups: SuggestionGroup[] = [
 // 👉 No Data suggestion
 const noDataSuggestions: Suggestion[] = [
   {
-    title: 'Analytics',
-    icon: 'tabler-chart-bar',
-    url: { name: 'dashboards-analytics' },
+    title: 'Início',
+    icon: 'tabler-smart-home',
+    url: { name: 'campaigns-home' },
   },
   {
-    title: 'CRM',
-    icon: 'tabler-chart-donut-3',
-    url: { name: 'dashboards-crm' },
+    title: 'Criar Campanha',
+    icon: 'tabler-plus',
+    url: { name: 'campaigns-create' },
   },
   {
-    title: 'eCommerce',
-    icon: 'tabler-shopping-cart',
-    url: { name: 'dashboards-ecommerce' },
+    title: 'Listar Campanhas',
+    icon: 'tabler-history',
+    url: { name: 'campaigns-list' },
   },
 ]
 
@@ -138,7 +170,7 @@ const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/App
       class="d-none d-md-flex align-center text-disabled ms-2"
       @click="Shepherd.activeTour?.cancel()"
     >
-      <span class="me-2">Search</span>
+      <span class="me-2">Procurar</span>
       <span class="meta-key">&#8984;K</span>
     </span>
   </div>

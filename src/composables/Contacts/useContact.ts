@@ -57,17 +57,20 @@ export function useContact() {
   });
 
   const updateOptions = (options: any) => {
-    sortBy.value = options.sortBy[0]?.key;
-    orderBy.value = options.sortBy[0]?.order;
+    // sortBy.value = options.sortBy[0]?.key;
+    // orderBy.value = options.sortBy[0]?.order;
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .slice(0, 2)
-      .map((w) => w[0].toUpperCase())
-      .join("");
-  };
+ const getInitials = (name: string) => {
+  const words = name.trim().split(/\s+/)
+
+  return words
+    .map(word => [...word].find(char => /[a-zA-ZÀ-ÿ]/.test(char)))
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
+}
 
   const stringToColor = (str: string) => {
     let hash = 0;

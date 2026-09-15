@@ -1,3 +1,4 @@
+import { startConnection, stopConnection } from "@/composables/useCampaignHub";
 import { router } from "@/plugins/1.router";
 import {
   IAuthConfig,
@@ -11,6 +12,7 @@ import authDefaultConfig from "./authDefaultConfig";
 
 const toast = useToast();
 const userData = useCookie<any>("userData");
+const interceptedAxios = new WeakSet<AxiosInstance>();
 
 export default class AuthService implements IAuthService {
   axiosIns: AxiosInstance;
@@ -22,7 +24,11 @@ export default class AuthService implements IAuthService {
 
     this.configureInterceptorsAxiosInstance(this.axiosIns);
   }
+
   configureInterceptorsAxiosInstance(axiosIns: AxiosInstance) {
+    if (interceptedAxios.has(axiosIns)) return;
+    interceptedAxios.add(axiosIns);
+
     let isRefreshing = false;
     let failedQueue: any[] = [];
 
@@ -38,7 +44,6 @@ export default class AuthService implements IAuthService {
       failedQueue = [];
     };
 
-    // ✅ REQUEST
     axiosIns.interceptors.request.use(
       (config) => {
         const accessToken = useCookie("accessToken").value;
@@ -52,24 +57,21 @@ export default class AuthService implements IAuthService {
       (error) => Promise.reject(error),
     );
 
-    // ✅ RESPONSE
     axiosIns.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
 
-        // ❌ não é 401
         if (error.response?.status !== 401) {
           return Promise.reject(error);
         }
 
-        // ❌ evitar loop infinito
         if (originalRequest._retry) {
           return Promise.reject(error);
         }
 
-        // ❌ não interceptar refresh
-        if (originalRequest.url.includes("/refresh")) {
+        const requestUrl = String(originalRequest?.url ?? "").toLowerCase();
+        if (requestUrl.includes("refresh")) {
           return Promise.reject(error);
         }
 
@@ -80,7 +82,6 @@ export default class AuthService implements IAuthService {
           return Promise.reject(error);
         }
 
-        // 🔒 se já está atualizando, entra na fila
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
             failedQueue.push({
@@ -99,23 +100,19 @@ export default class AuthService implements IAuthService {
         isRefreshing = true;
 
         try {
-          // ⚠️ IMPORTANTE: ideal usar outro axios aqui
           const response = await this.refreshToken(refreshToken);
 
           const newAccessToken = response.accessToken;
           const newRefreshToken = response.refreshToken;
 
-          // 💾 salva novos tokens
           useCookie("accessToken").value = newAccessToken;
           useCookie("refreshToken").value = newRefreshToken;
 
-          // atualiza header global
           axiosIns.defaults.headers.common["Authorization"] =
             `Bearer ${newAccessToken}`;
 
           processQueue(null, newAccessToken);
 
-          // atualiza request original
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
           return axiosIns(originalRequest);
@@ -135,7 +132,15 @@ export default class AuthService implements IAuthService {
       this.serviceConfig.loginEndpoint,
       payload,
     );
-    return response.data;
+    return this.persistSession(this.normalizeAuthResponse(response.data));
+  }
+
+  async loginWithGoogle(credential: IBodyLogin): Promise<IResponseAuth> {
+    const response = await this.axiosIns.post(
+      this.serviceConfig.loginWithGoogle,
+      credential,
+    );
+    return this.persistSession(this.normalizeAuthResponse(response.data));
   }
 
   async refreshToken(refreshToken: string): Promise<IResponseAuth> {
@@ -143,13 +148,41 @@ export default class AuthService implements IAuthService {
       refreshToken,
     });
 
-    return response.data;
+    return this.normalizeAuthResponse(response.data);
   }
 
-  logout = async () => {
+  logout = async (payload?: { expired?: boolean }) => {
     useCookie("accessToken").value = null;
+    useCookie("refreshToken").value = null;
+    useCookie("userAbilityRules").value = null;
     userData.value = null;
-    router.push("/login");
-    toast.error("Sua sessão expirou. Faça login novamente para continuar.");
+    await stopConnection();
+    await router.push("/login");
+
+    if (payload?.expired !== false) {
+      toast.error("Sua sessão expirou. Faça login novamente para continuar.");
+    }
   };
+
+  private normalizeAuthResponse(data: any): IResponseAuth {
+    return {
+      accessToken:
+        data?.accessToken ?? data?.token ?? data?.AccessToken ?? data?.Token,
+      refreshToken: data?.refreshToken ?? data?.RefreshToken,
+      userData: data?.userData ?? data?.UserData,
+      userAbilityRules: data?.userAbilityRules ?? data?.UserAbilityRules,
+    };
+  }
+
+  private persistSession(auth: IResponseAuth): IResponseAuth {
+    if (auth.accessToken) useCookie("accessToken").value = auth.accessToken;
+    if (auth.refreshToken) useCookie("refreshToken").value = auth.refreshToken;
+    if (auth.userData) useCookie("userData").value = auth.userData;
+    if (auth.userAbilityRules)
+      useCookie("userAbilityRules").value = auth.userAbilityRules;
+
+    void stopConnection().then(() => startConnection());
+
+    return auth;
+  }
 }

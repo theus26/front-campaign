@@ -59,22 +59,14 @@ const login = async () => {
     }
     const response = await useAuth.login(payload)
 
-    const { accessToken, refreshToken, userData, userAbilityRules } = response;
+    const { userAbilityRules } = response
 
-    useCookie("userAbilityRules").value = userAbilityRules;
-    ability.update(userAbilityRules);
+    useCookie("userAbilityRules").value = userAbilityRules
+    ability.update(userAbilityRules)
 
-    useCookie("userData").value = userData;
-    useCookie("accessToken").value = accessToken;
-    useCookie("refreshToken").value = refreshToken;
-
-    // Redirect to `to` query if exist or redirect to index route
-    // ❗ nextTick is required to wait for DOM updates and later redirect
     await nextTick(() => {
-      router.replace(route.query.to ? String(route.query.to) : "/");
-    });
-
-    router.push
+      router.replace(route.query.to ? String(route.query.to) : "/")
+    })
   } catch (err: any) {
     toast.error(
       errors.value.message ?? "Ocorreu um erro inesperado. Tente novamente."

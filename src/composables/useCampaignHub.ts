@@ -14,6 +14,7 @@ import {
 
 let connection: HubConnection | null = null;
 let connecting = false;
+let lastToken = "";
 let retryTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const getAccessToken = () => {
@@ -60,7 +61,8 @@ const scheduleRetry = () => {
 export const startConnection = async () => {
   const token = getAccessToken();
   if (!token || connecting) return;
-  if (connection?.state === HubConnectionState.Connected) return;
+  if (connection?.state === HubConnectionState.Connected && lastToken === token)
+    return;
 
   connecting = true;
 
@@ -91,10 +93,12 @@ export const startConnection = async () => {
 
     connection.onclose(() => {
       connection = null;
+      lastToken = "";
       if (getAccessToken()) scheduleRetry();
     });
 
     await connection.start();
+    lastToken = token;
     console.info("[campanha] conectado ao hub de notificações");
   } catch (error) {
     console.error("Não foi possível conectar ao hub de campanhas:", error);
@@ -119,6 +123,7 @@ export const stopConnection = async () => {
   } finally {
     connection = null;
     connecting = false;
+    lastToken = "";
   }
 };
 
